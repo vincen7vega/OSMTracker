@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--Główne tytuły-->
+    <string name="app_name">OSM Tracking App</string>
+    <string name="title_activity_settings">Ustawienia</string>
+
+    <!--Teksty przycisków-->
+    <string name="button_start_tracking">Śledzenie start</string>
+    <string name="button_stop_tracking">Śledzenie stop</string>
+
+    <!--Okienka dialogowe-->
+    <string name="dialog_text_gpx_upload">Utworzono ślad GPX. Przesłać na serwer OpenStreetMap?</string>
+    <string name="dialog_yes">Tak</string>
+    <string name="dialog_no">Nie</string>
+
+    <!--Ekran preferencji-->
+    <string name="pref_title_credentials">Dane konta OpenStreetMap</string>
+    <string name="pref_title_username">Nazwa użytkownika</string>
+    <string name="pref_title_password">Hasło</string>
+    <string name="pref_summary_username">Twoja nazwa użytkownika OpenStreetMap</string>
+    <string name="pref_summary_password">Twoje hasło do konta OpenStreetMap </string>
+
+</resources>

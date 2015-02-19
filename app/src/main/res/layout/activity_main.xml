@@ -1,0 +1,52 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    >
+
+    <org.osmdroid.views.MapView
+        android:id="@+id/map_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+    />
+
+    <!--TODO pomyśleć nad przeniesieniem części atrybutów do odpowiednich stylów
+        TODO poprawić stylistykę przycisków-->
+
+    <ImageButton
+        android:id="@+id/button_show_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:padding="@dimen/button_padding"
+        android:src="@drawable/button_show_location"
+        android:onClick="showLocationButtonHandler"
+        />
+
+    <Button
+        android:id="@+id/button_stop_tracking"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button_show_location"
+        android:layout_alignRight="@+id/button_show_location"
+        android:layout_alignEnd="@+id/button_show_location"
+        android:text="@string/button_stop_tracking"
+        android:onClick="stopTrackingButtonHandler"
+        />
+
+    <Button
+        android:id="@+id/button_start_tracking"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button_stop_tracking"
+        android:layout_alignRight="@+id/button_stop_tracking"
+        android:layout_alignEnd="@+id/button_stop_tracking"
+        android:text="@string/button_start_tracking"
+        android:onClick="startTrackingButtonHandler"
+        />
+
+</RelativeLayout>
