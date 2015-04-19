@@ -3,18 +3,18 @@ package com.gmail.perdenia.maciej.osmtrackingapp;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class TrackPoint implements Parcelable {
+public class WayPoint implements Parcelable {
     private double mLatitude;
     private double mLongitude;
     private String mTimeStamp;
 
-    public TrackPoint(double latitude, double longitude, String timeStamp) {
+    public WayPoint(double latitude, double longitude, String timeStamp) {
         mLatitude = latitude;
         mLongitude = longitude;
         mTimeStamp = timeStamp;
     }
 
-    public TrackPoint(Parcel in) {
+    public WayPoint(Parcel in) {
         readFromParcel(in);
     }
 
@@ -50,12 +50,12 @@ public class TrackPoint implements Parcelable {
 
     public static final Creator CREATOR =
             new Creator() {
-                public TrackPoint createFromParcel(Parcel in) {
-                    return new TrackPoint(in);
+                public WayPoint createFromParcel(Parcel in) {
+                    return new WayPoint(in);
                 }
 
-                public TrackPoint[] newArray(int size) {
-                    return new TrackPoint[size];
+                public WayPoint[] newArray(int size) {
+                    return new WayPoint[size];
                 }
             };
 }

@@ -16,9 +16,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-// TODO pomyśleć nad użyciem Volley'a
-// TODO pomyśleć na użyciem OAuth
-
 public class GpxUploader {
 
     public static final String TAG = "GpxUploader";

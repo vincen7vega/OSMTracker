@@ -6,13 +6,20 @@
     <string name="title_activity_settings">Ustawienia</string>
 
     <!--Teksty przycisków-->
-    <string name="button_start_tracking">Śledzenie start</string>
-    <string name="button_stop_tracking">Śledzenie stop</string>
+    <string name="btn_start_tracking">Śledzenie start</string>
+    <string name="btn_stop_tracking">Śledzenie stop</string>
+    <string name="btn_save_waypoint">Zapisz pkt</string>
 
     <!--Okienka dialogowe-->
-    <string name="dialog_text_gpx_upload">Utworzono ślad GPX. Przesłać na serwer OpenStreetMap?</string>
-    <string name="dialog_yes">Tak</string>
-    <string name="dialog_no">Nie</string>
+    <string name="dialog_text_gpx_upload">Utworzono plik GPX. Przesłać na serwer OpenStreetMap?</string>
+    <string name="dialog_text_enable_gps">Do działania aplikacji niezbędna jest aktywna usługa
+        GPS. Przejdź do ustawień i aktywuj ją.</string>
+    <string name="dialog_text_enable_internet">Do działania aplikacji niezbędny jest dostęp do
+        Internetu. Przejdź do ustawień i aktywuj połączenie z Internetem.</string>
+    <string name="dialog_btn_yes">Tak</string>
+    <string name="dialog_btn_ok">OK</string>
+    <string name="dialog_btn_no">Nie</string>
+    <string name="dialog_btn_cancel">Anuluj</string>
 
     <!--Ekran preferencji-->
     <string name="pref_title_credentials">Dane konta OpenStreetMap</string>

@@ -1,10 +1,18 @@
 package com.gmail.perdenia.maciej.osmtrackingapp;
 
+import android.app.AlertDialog;
 import android.app.DialogFragment;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
+import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -33,8 +41,7 @@ import org.osmdroid.views.overlay.ScaleBarOverlay;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-
-// TODO pomyśleć nad używaniem fragmentów
+import java.util.TimeZone;
 
 public class MainActivity extends ActionBarActivity
                           implements GoogleApiClient.ConnectionCallbacks,
@@ -60,6 +67,8 @@ public class MainActivity extends ActionBarActivity
             UPDATE_INTERVAL_IN_MILLISECONDS / 2;
     public static final String PREFERRED_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
+    private LocationManager mLocationManager;
+
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private Location mCurrentLocation;
@@ -79,7 +88,7 @@ public class MainActivity extends ActionBarActivity
     private boolean mRequestingTracking;
     private org.osmdroid.bonuspack.overlays.Polyline mTrackOverlay;
     private ArrayList<GeoPoint> mTrackOverlayPoints;
-    private ArrayList<TrackPoint> mTrackPoints;
+    private ArrayList<WayPoint> mTrackPoints;
     private String mGpxFilename;
 
     @Override
@@ -87,12 +96,22 @@ public class MainActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        if (!wifiManager.isWifiEnabled()) {
+            wifiManager.setWifiEnabled(true);
+        }
+
+        if (!isOnline()) buildInternetAlertDialog();
+
+        if (!isGpsOrNetworkEnabled()) buildGpsAlertDialog();
+
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         initUI();
 
         mResourceProxy = new DefaultResourceProxyImpl(this);
         mSimpleDateFormat = new SimpleDateFormat(PREFERRED_DATE_FORMAT);
+        mSimpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         mLastUpdateTime = "";
         mGpxFilename = "";
         mSavedMapCenter = null;
@@ -187,15 +206,18 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onConnected(Bundle bundle) {
         Log.i(TAG, "Connected to GoogleApiClient");
+
         if (mCurrentLocation == null) {
             mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            mCurrentGeoPoint = new GeoPoint(mCurrentLocation.getLatitude(),
-                    mCurrentLocation.getLongitude());
-            mLastUpdateTime = mSimpleDateFormat.format(new Date());
+            if (mCurrentLocation != null) {
+                mCurrentGeoPoint = new GeoPoint(mCurrentLocation.getLatitude(),
+                        mCurrentLocation.getLongitude());
+                mLastUpdateTime = mSimpleDateFormat.format(new Date());
 
-            updateUI();
+                updateUI();
 
-            mMapController.setCenter(mCurrentGeoPoint);
+                mMapController.setCenter(mCurrentGeoPoint);
+            }
         }
 
         if (mSavedMapCenter != null) mMapController.setCenter(mSavedMapCenter);
@@ -237,7 +259,7 @@ public class MainActivity extends ActionBarActivity
 
     public void showLocationButtonHandler(View view) {
         mMapController.setZoom(PREFERRED_ZOOM);
-        mMapController.animateTo(mCurrentGeoPoint);
+        if (mCurrentGeoPoint != null) mMapController.animateTo(mCurrentGeoPoint);
     }
 
     public void startTrackingButtonHandler(View view) {
@@ -247,7 +269,7 @@ public class MainActivity extends ActionBarActivity
             mTrackOverlayPoints = new ArrayList<>();
 
             mTrackPoints = new ArrayList<>();
-            TrackPoint trackPoint = new TrackPoint(mCurrentLocation.getLatitude(),
+            WayPoint trackPoint = new WayPoint(mCurrentLocation.getLatitude(),
                     mCurrentLocation.getLongitude(), mLastUpdateTime);
             mTrackPoints.add(trackPoint);
             mGpxFilename = getResources().getString(R.string.app_name) + "_" + mLastUpdateTime;
@@ -262,13 +284,24 @@ public class MainActivity extends ActionBarActivity
             mRequestingTracking = false;
             setButtonsEnabledState();
             if (!mTrackPoints.isEmpty()) {
-                GpxCreator.saveAsGpxOnInternalStorage(this, mGpxFilename, mTrackPoints);
-                GpxCreator.saveAsGpxOnExternalStorage(this, mGpxFilename, mTrackPoints);
+                GpxCreator.saveGpxTrackOnInternalStorage(this, mGpxFilename, mTrackPoints);
+                GpxCreator.saveGpxTrackOnExternalStorage(this, mGpxFilename, mTrackPoints);
 
                 DialogFragment dialogFragment = GpxUploadDialogFragment.newInstance(mGpxFilename);
                 dialogFragment.show(getFragmentManager(), GPX_UPLOAD_DIALOG_TAG);
             }
         }
+    }
+
+    public void saveWayPointButtonHandler(View view) {
+        mGpxFilename = getResources().getString(R.string.app_name) + "_" + mLastUpdateTime;
+        WayPoint wayPoint = new WayPoint(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(),
+                mLastUpdateTime);
+        GpxCreator.saveGpxWayPointOnInternalStorage(this, mGpxFilename, wayPoint);
+        GpxCreator.saveGpxWayPointOnExternalStorage(this, mGpxFilename, wayPoint);
+
+        DialogFragment dialogFragment = GpxUploadDialogFragment.newInstance(mGpxFilename);
+        dialogFragment.show(getFragmentManager(), GPX_UPLOAD_DIALOG_TAG);
     }
 
     private void setButtonsEnabledState() {
@@ -296,6 +329,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onResume() {
         super.onResume();
+
         if (mGoogleApiClient.isConnected()) {
             startLocationUpdates();
         }
@@ -361,9 +395,69 @@ public class MainActivity extends ActionBarActivity
         mLastUpdateTime = mSimpleDateFormat.format(new Date());
         updateUI();
         if (mRequestingTracking) {
-            TrackPoint trackPoint = new TrackPoint(mCurrentLocation.getLatitude(),
+            WayPoint trackPoint = new WayPoint(mCurrentLocation.getLatitude(),
                     mCurrentLocation.getLongitude(), mLastUpdateTime);
             mTrackPoints.add(trackPoint);
         }
+    }
+
+    public boolean isOnline() {
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        return (networkInfo != null && networkInfo.isConnected());
+    }
+
+    public boolean isGpsOrNetworkEnabled() {
+        if (mLocationManager == null) {
+            mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        }
+        boolean gpsEnabled = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        boolean networkEnabled =
+                mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+        return gpsEnabled || networkEnabled;
+    }
+
+    public void buildGpsAlertDialog() {
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setMessage(getResources().getString(R.string.dialog_text_enable_gps));
+            dialog.setPositiveButton(getResources().getString(R.string.dialog_btn_ok),
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                            startActivityForResult(intent, 1);
+                        }
+                    });
+            dialog.setNegativeButton(getString(R.string.dialog_btn_cancel),
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                            finish();
+                        }
+                    });
+            dialog.show();
+    }
+
+    public void buildInternetAlertDialog() {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setMessage(getResources().getString(R.string.dialog_text_enable_internet));
+        dialog.setPositiveButton(getResources().getString(R.string.dialog_btn_ok),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                        Intent intent = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
+                        startActivityForResult(intent, 1);
+                    }
+                });
+        dialog.setNegativeButton(getString(R.string.dialog_btn_cancel),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                        finish();
+                    }
+                });
+        dialog.show();
     }
 }

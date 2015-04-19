@@ -43,7 +43,7 @@ public class GpxUploadDialogFragment extends DialogFragment implements GpxUpload
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(R.string.dialog_text_gpx_upload)
-                .setPositiveButton(R.string.dialog_yes, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.dialog_btn_yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         SharedPreferences sharedPreferences = PreferenceManager.
                                 getDefaultSharedPreferences(getActivity());
@@ -57,7 +57,7 @@ public class GpxUploadDialogFragment extends DialogFragment implements GpxUpload
                                 username, password, mGpxFilename, "testing", "");
                     }
                 })
-                .setNegativeButton(R.string.dialog_no, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.dialog_btn_no, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dismiss();
                     }
