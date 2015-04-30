@@ -12,20 +12,18 @@
 
     <!--Okienka dialogowe-->
     <string name="dialog_text_gpx_upload">Utworzono plik GPX. Przesłać na serwer OpenStreetMap?</string>
-    <string name="dialog_text_enable_gps">Do działania aplikacji niezbędna jest aktywna usługa
-        GPS. Przejdź do ustawień i aktywuj ją.</string>
-    <string name="dialog_text_enable_internet">Do działania aplikacji niezbędny jest dostęp do
-        Internetu. Przejdź do ustawień i aktywuj połączenie z Internetem.</string>
+    <string name="dialog_text_enable_gps">Do poprawnego działania aplikacji niezbędne są usługi
+        lokalizacji. Przejdź do ustawień, aby je aktywować.</string>
     <string name="dialog_btn_yes">Tak</string>
     <string name="dialog_btn_ok">OK</string>
     <string name="dialog_btn_no">Nie</string>
     <string name="dialog_btn_cancel">Anuluj</string>
 
     <!--Ekran preferencji-->
-    <string name="pref_title_credentials">Dane konta OpenStreetMap</string>
-    <string name="pref_title_username">Nazwa użytkownika</string>
-    <string name="pref_title_password">Hasło</string>
-    <string name="pref_summary_username">Twoja nazwa użytkownika OpenStreetMap</string>
-    <string name="pref_summary_password">Twoje hasło do konta OpenStreetMap </string>
+    <string name="pref_title_user_data">Dane osobowe</string>
+    <string name="pref_title_name">Imię</string>
+    <string name="pref_title_surname">Nazwisko</string>
+    <string name="pref_summary_name">Twoje imię</string>
+    <string name="pref_summary_surname">Twoje nazwisko</string>
 
 </resources>

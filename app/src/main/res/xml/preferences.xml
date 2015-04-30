@@ -3,22 +3,21 @@
 
     <PreferenceCategory
         android:key="credentials-category-key"
-        android:title="@string/pref_title_credentials"
+        android:title="@string/pref_title_user_data"
         >
 
         <EditTextPreference
-            android:key="username-key"
-            android:title="@string/pref_title_username"
-            android:defaultValue=""
-            android:summary="@string/pref_summary_username"
+            android:key="user-name-key"
+            android:title="@string/pref_title_name"
+            android:defaultValue="Nieznany"
+            android:summary="@string/pref_summary_name"
             />
 
         <EditTextPreference
-            android:key="password-key"
-            android:title="@string/pref_title_password"
-            android:defaultValue=""
-            android:summary="@string/pref_summary_password"
-            android:inputType="textPassword"
+            android:key="user-surname-key"
+            android:title="@string/pref_title_surname"
+            android:defaultValue="Nieznany"
+            android:summary="@string/pref_summary_surname"
             />
 
     </PreferenceCategory>
