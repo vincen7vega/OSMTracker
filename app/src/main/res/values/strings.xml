@@ -14,6 +14,7 @@
     <string name="dialog_text_gpx_upload">Utworzono plik GPX. Przesłać na serwer OpenStreetMap?</string>
     <string name="dialog_text_enable_gps">Do poprawnego działania aplikacji niezbędne są usługi
         lokalizacji. Przejdź do ustawień, aby je aktywować.</string>
+    <string name="dialog_text_upload_name">Wprowadź nazwę:</string>
     <string name="dialog_btn_yes">Tak</string>
     <string name="dialog_btn_ok">OK</string>
     <string name="dialog_btn_no">Nie</string>

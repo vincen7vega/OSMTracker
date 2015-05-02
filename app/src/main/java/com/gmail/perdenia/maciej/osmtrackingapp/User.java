@@ -1,23 +1,21 @@
 package com.gmail.perdenia.maciej.osmtrackingapp;
 
-import android.location.Location;
-
 public class User {
 
     private String mName;
     private String mSurname;
-    private Location mLocation;
+    private WayPoint mWayPoint;
 
     public User(String name, String surname) {
         mName = name;
         mSurname = surname;
-        mLocation = null;
+        mWayPoint = null;
     }
 
-    public User(String name, String surname, Location location) {
+    public User(String name, String surname, WayPoint wayPoint) {
         mName = name;
         mSurname = surname;
-        mLocation = location;
+        mWayPoint = wayPoint;
     }
 
     public void setName(String name) {
@@ -36,11 +34,11 @@ public class User {
         return mSurname;
     }
 
-    public void setLocation(Location location) {
-        mLocation = location;
+    public void setWayPoint(WayPoint wayPoint) {
+        mWayPoint = wayPoint;
     }
 
-    public Location getLocation() {
-        return mLocation;
+    public WayPoint getWayPoint() {
+        return mWayPoint;
     }
 }

@@ -1,7 +1,6 @@
 package com.gmail.perdenia.maciej.osmtrackingapp;
 
 import android.app.AlertDialog;
-import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,6 +19,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -43,14 +43,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 
 public class MainActivity extends ActionBarActivity implements GoogleApiClient.ConnectionCallbacks,
                                      GoogleApiClient.OnConnectionFailedListener,
                                      LocationListener {
 
     public static final String TAG = MainActivity.class.getSimpleName();
-    public static final String GPX_UPLOAD_DIALOG_TAG = "GpxUploadDialog";
+    // public static final String GPX_UPLOAD_DIALOG_TAG = "GpxUploadDialog";
 
     private static final String LOCATION_KEY = "location-key";
     private static final String LAST_UPDATE_TIME_KEY = "last-update-time";
@@ -69,15 +68,13 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 5000;
     public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
             UPDATE_INTERVAL_IN_MILLISECONDS / 2;
-    public static final String PREFERRED_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
     private LocationManager mLocationManager;
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private Location mCurrentLocation;
-    private SimpleDateFormat mSimpleDateFormat;
-    private String mLastUpdateTime;
+    private Date mLastUpdateTime;
 
     private MapView mMapView;
     private MapController mMapController;
@@ -120,10 +117,6 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         mStartTrackingBtn = (Button) findViewById(R.id.button_start_tracking);
         mStopTrackingBtn = (Button) findViewById(R.id.button_stop_tracking);
         setButtonsEnabledState();
-
-        mSimpleDateFormat = new SimpleDateFormat(PREFERRED_DATE_FORMAT, Locale.US);
-        mSimpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        mLastUpdateTime = "";
 
         mRequestingTracking = false;
         mGpxFilename = "";
@@ -181,7 +174,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
                 String fullName = ou.getName() + " " + ou.getSurname();
                 OverlayItem userItem = new OverlayItem(fullName,
                         "Położenie użytkownika " + fullName, new GeoPoint(
-                        ou.getLocation().getLatitude(), ou.getLocation().getLongitude()));
+                        ou.getWayPoint().getLatitude(), ou.getWayPoint().getLongitude()));
                 usersOverlayItems.add(userItem);
             }
             ItemizedIconOverlay<OverlayItem> usersOverlay =
@@ -230,13 +223,17 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         if (mCurrentLocation == null) {
             mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             if (mCurrentLocation != null) {
-                mUser.setLocation(mCurrentLocation);
+                mCurrentGeoPoint = new GeoPoint(mCurrentLocation.getLatitude(),
+                        mCurrentLocation.getLongitude());
+
+                mLastUpdateTime = new Date();
+                mUser.setWayPoint(new WayPoint(
+                        mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(),
+                        mLastUpdateTime));
                 if (isOnline()) {
                     new Thread(new Client(this, mUser)).start();
                 }
-                mCurrentGeoPoint = new GeoPoint(mCurrentLocation.getLatitude(),
-                        mCurrentLocation.getLongitude());
-                mLastUpdateTime = mSimpleDateFormat.format(new Date());
+
                 updateUI();
                 mMapController.setCenter(mCurrentGeoPoint);
             }
@@ -271,17 +268,21 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     public void onLocationChanged(Location location) {
         Log.d(TAG, "Location changed: " + location.getLatitude() + "/" + location.getLongitude());
         mCurrentLocation = location;
-        mUser.setLocation(mCurrentLocation);
+        mCurrentGeoPoint = new GeoPoint(mCurrentLocation.getLatitude(),
+                mCurrentLocation.getLongitude());
+        mLastUpdateTime = new Date();
+
+        mUser.setWayPoint(new WayPoint(
+                mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), mLastUpdateTime));
         if (isOnline()) {
             new Thread(new Client(this, mUser)).start();
         }
-        mCurrentGeoPoint = new GeoPoint(mCurrentLocation.getLatitude(),
-                mCurrentLocation.getLongitude());
-        mLastUpdateTime = mSimpleDateFormat.format(new Date());
+
         updateUI();
         if (mRequestingTracking) {
             WayPoint trackPoint = new WayPoint(mCurrentLocation.getLatitude(),
                     mCurrentLocation.getLongitude(), mLastUpdateTime);
+            trackPoint.setAltitude(mCurrentLocation.getAltitude());
             mTrackPoints.add(trackPoint);
         }
     }
@@ -292,13 +293,17 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         }
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (mCurrentLocation != null) {
-            mUser.setLocation(mCurrentLocation);
+            mCurrentGeoPoint = new GeoPoint(mCurrentLocation.getLatitude(),
+                    mCurrentLocation.getLongitude());
+            mLastUpdateTime = new Date();
+
+            mUser.setWayPoint(new WayPoint(
+                    mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(),
+                    mLastUpdateTime));
             if (isOnline()) {
                 new Thread(new Client(this, mUser)).start();
             }
-            mCurrentGeoPoint = new GeoPoint(mCurrentLocation.getLatitude(),
-                    mCurrentLocation.getLongitude());
-            mLastUpdateTime = mSimpleDateFormat.format(new Date());
+
             updateUI();
             mMapController.setZoom(PREFERRED_ZOOM);
             mMapController.animateTo(mCurrentGeoPoint);
@@ -318,8 +323,12 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
                 mTrackPoints = new ArrayList<>();
                 WayPoint trackPoint = new WayPoint(mCurrentLocation.getLatitude(),
                         mCurrentLocation.getLongitude(), mLastUpdateTime);
+                trackPoint.setAltitude(mCurrentLocation.getAltitude());
                 mTrackPoints.add(trackPoint);
-                mGpxFilename = getResources().getString(R.string.app_name) + "_" + mLastUpdateTime;
+
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US);
+                mGpxFilename = sdf.format(mLastUpdateTime) + "_" + mUser.getSurname() + "_"
+                        + mUser.getName();
 
                 mRequestingTracking = true;
                 setButtonsEnabledState();
@@ -332,11 +341,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
             mRequestingTracking = false;
             setButtonsEnabledState();
             if (!mTrackPoints.isEmpty()) {
-                GpxCreator.saveGpxTrackOnInternalStorage(this, mGpxFilename, mTrackPoints);
-                GpxCreator.saveGpxTrackOnExternalStorage(this, mGpxFilename, mTrackPoints);
-
-                DialogFragment dialogFragment = GpxUploadDialogFragment.newInstance(mGpxFilename);
-                dialogFragment.show(getFragmentManager(), GPX_UPLOAD_DIALOG_TAG);
+                buildUploadAlertDialog(null);
             }
         }
     }
@@ -352,14 +357,13 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     }
 
     public void saveWayPointButtonHandler(View view) {
-        mGpxFilename = getResources().getString(R.string.app_name) + "_" + mLastUpdateTime;
-        WayPoint wayPoint = new WayPoint(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(),
-                mLastUpdateTime);
-        GpxCreator.saveGpxWayPointOnInternalStorage(this, mGpxFilename, wayPoint);
-        GpxCreator.saveGpxWayPointOnExternalStorage(this, mGpxFilename, wayPoint);
-
-        DialogFragment dialogFragment = GpxUploadDialogFragment.newInstance(mGpxFilename);
-        dialogFragment.show(getFragmentManager(), GPX_UPLOAD_DIALOG_TAG);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US);
+        mGpxFilename = sdf.format(mLastUpdateTime) + "_" + mUser.getSurname() + "_"
+                + mUser.getName();
+        WayPoint wayPoint = new WayPoint(mCurrentLocation.getLatitude(),
+                mCurrentLocation.getLongitude(), mLastUpdateTime);
+        wayPoint.setAltitude(mCurrentLocation.getAltitude());
+        buildUploadAlertDialog(wayPoint);
     }
 
     @Override
@@ -371,7 +375,9 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     @Override
     protected void onPause() {
         super.onPause();
-        stopLocationUpdates();
+        if (mGoogleApiClient.isConnected()) {
+            stopLocationUpdates();
+        }
     }
 
     @Override
@@ -394,7 +400,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         savedInstanceState.putParcelable(LOCATION_KEY, mCurrentLocation);
-        savedInstanceState.putString(LAST_UPDATE_TIME_KEY, mLastUpdateTime);
+        savedInstanceState.putSerializable(LAST_UPDATE_TIME_KEY, mLastUpdateTime);
 
         savedInstanceState.putBoolean(REQUESTING_TRACKING_KEY, mRequestingTracking);
 
@@ -421,7 +427,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
             }
 
             if(savedInstanceState.keySet().contains(LAST_UPDATE_TIME_KEY)) {
-                mLastUpdateTime = savedInstanceState.getString(LAST_UPDATE_TIME_KEY);
+                mLastUpdateTime = (Date) savedInstanceState.getSerializable(LAST_UPDATE_TIME_KEY);
             }
 
             if (savedInstanceState.keySet().contains(REQUESTING_TRACKING_KEY)) {
@@ -482,24 +488,24 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     }
 
     public void buildGpsAlertDialog() {
-            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-            dialog.setMessage(getResources().getString(R.string.dialog_text_enable_gps));
-            dialog.setPositiveButton(getResources().getString(R.string.dialog_btn_ok),
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                            startActivityForResult(intent, 1);
-                        }
-                    });
-            dialog.setNegativeButton(getString(R.string.dialog_btn_cancel),
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setMessage(getResources().getString(R.string.dialog_text_enable_gps));
+        dialog.setPositiveButton(getResources().getString(R.string.dialog_btn_ok),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivityForResult(intent, 1);
+                    }
+                });
+        dialog.setNegativeButton(getString(R.string.dialog_btn_cancel),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
 
-                        }
-                    });
-            dialog.show();
+                    }
+                });
+        dialog.show();
     }
 
     public boolean isOnline() {
@@ -511,5 +517,63 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
 
     public void setOtherUsers(List<User> otherUsers) {
         mOtherUsers = otherUsers;
+    }
+
+    public void buildUploadAlertDialog(final WayPoint wayPoint) {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setMessage(getResources().getString(R.string.dialog_text_upload_name));
+
+        final EditText input = new EditText(this);
+        dialog.setView(input);
+
+        dialog.setPositiveButton(getResources().getString(R.string.dialog_btn_ok),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                        char[] gpx;
+                        String name = input.getText().toString();
+                        if (wayPoint != null) {
+                            gpx = GpxCreator
+                                    .saveGpxWayPointOnInternalStorage(
+                                            MainActivity.this, mGpxFilename, name, wayPoint);
+                            GpxCreator.saveGpxWayPointOnExternalStorage(
+                                    MainActivity.this, mGpxFilename, name, wayPoint);
+                        } else {
+                            gpx = GpxCreator
+                                    .saveGpxTrackOnInternalStorage(
+                                            MainActivity.this, mGpxFilename, name, mTrackPoints);
+                            GpxCreator.saveGpxTrackOnExternalStorage(
+                                    MainActivity.this, mGpxFilename, name, mTrackPoints);
+                        }
+                        if (isOnline() && gpx != null) {
+                            new Thread(new Client(MainActivity.this, mUser, new String(gpx)))
+                                    .start();
+                        }
+                    }
+        });
+
+        dialog.setNegativeButton(getResources().getString(R.string.dialog_btn_cancel),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        char[] gpx;
+                        if (wayPoint != null) {
+                            gpx = GpxCreator
+                                    .saveGpxWayPointOnInternalStorage(MainActivity.this,
+                                            mGpxFilename, mGpxFilename, wayPoint);
+                            GpxCreator.saveGpxWayPointOnExternalStorage(
+                                    MainActivity.this, mGpxFilename, mGpxFilename, wayPoint);
+                        } else {
+                            gpx = GpxCreator
+                                    .saveGpxTrackOnInternalStorage(MainActivity.this, mGpxFilename,
+                                            mGpxFilename, mTrackPoints);
+                            GpxCreator.saveGpxTrackOnExternalStorage(
+                                    MainActivity.this, mGpxFilename, mGpxFilename, mTrackPoints);
+                        }
+                        if (isOnline() && gpx != null) {
+                            new Thread(new Client(MainActivity.this, mUser, new String(gpx)))
+                                    .start();
+                        }
+                    }
+                });
+        dialog.show();
     }
 }
