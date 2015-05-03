@@ -23,7 +23,7 @@ public class Client implements Runnable {
     public static final String TAG = Client.class.getSimpleName();
 
     private static final int SERVER_PORT = 60000;
-    private static final String SERVER_IP = "192.168.1.13";
+    private static final String SERVER_IP = "83.8.99.178";
 
     private MainActivity mContext;
     private User mUser;
