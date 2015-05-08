@@ -6,55 +6,39 @@
     tools:context=".MainActivity"
     >
 
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar"
+        />
+
     <org.osmdroid.views.MapView
         android:id="@+id/map_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
 
-    <ImageButton
-        android:id="@+id/button_show_location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+    <com.gmail.perdenia.maciej.osmtrackingapp.FloatingActionButton
+        android:id="@+id/fab_go_to_location"
+        android:layout_width="@dimen/fab_size"
+        android:layout_height="@dimen/fab_size"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:padding="@dimen/button_padding"
-        android:src="@drawable/button_show_location"
-        android:onClick="showLocation"
-        />
-
-    <Button
-        android:id="@+id/button_stop_tracking"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/button_show_location"
-        android:layout_alignRight="@+id/button_show_location"
-        android:layout_alignEnd="@+id/button_show_location"
-        android:text="@string/btn_stop_tracking"
-        android:onClick="stopTracking"
-        />
-
-    <Button
-        android:id="@+id/button_start_tracking"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/button_stop_tracking"
-        android:layout_alignRight="@+id/button_stop_tracking"
-        android:layout_alignEnd="@+id/button_stop_tracking"
-        android:text="@string/btn_start_tracking"
-        android:onClick="startTracking"
-        />
-
-    <Button
-        android:id="@+id/button_save_waypoint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:text="@string/btn_save_waypoint"
-        android:onClick="saveWayPointButtonHandler"
-        />
+        android:layout_marginRight="@dimen/fab_margin_right"
+        android:layout_marginEnd="@dimen/fab_margin_right"
+        android:layout_marginBottom="@dimen/fab_margin_bottom"
+        android:background="@drawable/fab_background"
+        >
+
+        <ImageView
+            android:layout_width="@dimen/fab_icon_size"
+            android:layout_height="@dimen/fab_icon_size"
+            android:layout_gravity="center"
+            android:src="@drawable/fab_icons"
+            android:duplicateParentState="true"
+            android:contentDescription="@string/img_view_desc_go_to_location"
+            />
+
+    </com.gmail.perdenia.maciej.osmtrackingapp.FloatingActionButton>
 
 </RelativeLayout>

@@ -1,6 +1,7 @@
 package com.gmail.perdenia.maciej.osmtrackingapp;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -16,7 +17,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.List;
 
 public class Client implements Runnable {
 
@@ -52,6 +52,7 @@ public class Client implements Runnable {
 
             if (!mGpx.equals("")) {
                 JSONObject jsonToSend = new JSONObject();
+                jsonToSend.put("id", mUser.getId());
                 jsonToSend.put("name", mUser.getName());
                 jsonToSend.put("surname", mUser.getSurname());
                 jsonToSend.put("time", mUser.getWayPoint().getTimeString());
@@ -62,8 +63,10 @@ public class Client implements Runnable {
                 InputStream inFromServer = client.getInputStream();
                 DataInputStream in = new DataInputStream(inFromServer);
                 Log.i(TAG, "Odpowiedź serwera: " + in.readUTF());
+                Toast.makeText(mContext, "Plik zapisano na serwerze", Toast.LENGTH_LONG).show();
             } else {
                 JSONObject jsonToSend = new JSONObject();
+                jsonToSend.put("id", mUser.getId());
                 jsonToSend.put("name", mUser.getName());
                 jsonToSend.put("surname", mUser.getSurname());
                 JSONObject jsonLocation = new JSONObject();
@@ -72,21 +75,22 @@ public class Client implements Runnable {
                 jsonToSend.put("location", jsonLocation);
                 jsonToSend.put("time", mUser.getWayPoint().getTimeString());
                 String jsonToSendString = jsonToSend.toString();
-                // Log.i(TAG, "JSON wysłany: " + jsonToSendString);
                 out.writeUTF(jsonToSendString);
+                Log.i(TAG, "JSON wysłany: " + jsonToSendString);
 
                 InputStream inFromServer = client.getInputStream();
                 DataInputStream in = new DataInputStream(inFromServer);
                 String jsonStringReceived = in.readUTF();
-                // Log.i(TAG, "JSON odebrany: " + in.readUTF());
+                Log.i(TAG, "JSON odebrany: " + jsonStringReceived);
 
                 JSONParser parser = new JSONParser();
                 Object object = parser.parse(jsonStringReceived);
                 JSONArray jsonArrayReceived = (JSONArray) object;
 
-                List<User> otherUsers = new ArrayList<>();
+                ArrayList<User> otherUsers = new ArrayList<>();
                 for (int i = 0; i < jsonArrayReceived.size(); i++) {
                     JSONObject userReceived = (JSONObject) jsonArrayReceived.get(i);
+                    int idReceived = (int) userReceived.get("id");
                     String nameReceived = (String) userReceived.get("name");
                     String surnameReceived = (String) userReceived.get("surname");
                     JSONObject locationReceived = (JSONObject) userReceived.get("location");
@@ -95,13 +99,13 @@ public class Client implements Runnable {
                     String timeReceivedString = (String) userReceived.get("time");
                     WayPoint wayPoint = new WayPoint(latitudeReceived, longitudeReceived,
                             timeReceivedString);
-                    otherUsers.add(new User(nameReceived, surnameReceived, wayPoint));
+                    otherUsers.add(new User(idReceived, nameReceived, surnameReceived, wayPoint));
                 }
 
-                for(User ou : otherUsers) {
-                    Log.i(TAG, ou.getName() + " " + ou.getSurname() + ", "
-                            + ou.getWayPoint().getLatitude() + "/" + ou.getWayPoint().getLongitude()
-                            + ", " + ou.getWayPoint().getTimeString());
+                for(User u : otherUsers) {
+                    Log.i(TAG, u.getId() + " " + u.getName() + " " + u.getSurname() + ", " +
+                            u.getWayPoint().getLatitude() + "/" + u.getWayPoint().getLongitude() +
+                            ", " + u.getWayPoint().getTimeString());
                 }
 
                 mContext.setOtherUsers(otherUsers);
@@ -109,15 +113,15 @@ public class Client implements Runnable {
 
             client.close();
         } catch (UnknownHostException e) {
-            Log.w(TAG, "Unknown Host Exception");
+            Log.w(TAG, "Złapano wyjątek (Unknown Host Exception)");
             e.printStackTrace();
         } catch (IOException e) {
-            Log.w(TAG, "IO Exception");
+            Log.w(TAG, "Złapano wyjątek (IO Exception)");
             e.printStackTrace();
-        } catch (ParseException pe) {
-            Log.w(TAG, "Parse Exception, pozycja: " + pe.getPosition());
-            Log.w(TAG, pe.toString());
-            pe.printStackTrace();
+        } catch (ParseException e) {
+            Log.w(TAG, "Złapano wyjątek (Parse Exception), pozycja: " + e.getPosition());
+            Log.w(TAG, e.toString());
+            e.printStackTrace();
         }
     }
 }

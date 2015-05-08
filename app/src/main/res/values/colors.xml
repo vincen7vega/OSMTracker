@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
-    <color name="blue">#0000ff</color>
-    
+
+    <color name="primary">#E0E0E0</color>
+    <color name="primary_dark">#757575</color>
+    <color name="accent">#00C853</color>
+
+    <color name="primary_text">#DE000000</color>
+    <color name="secondary_text">#8A000000</color>
+    <color name="hints">#42000000</color>
+    <color name="primary_text_inverse">#FFFFFFFF</color>
+    <color name="secondary_text_inverse">#B3FFFFFF</color>
+    <color name="hints_inverse">#4DFFFFFF</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="gray400">#BDBDBD</color>
+
 </resources>

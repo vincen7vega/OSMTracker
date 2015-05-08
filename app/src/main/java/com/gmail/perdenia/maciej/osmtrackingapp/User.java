@@ -2,20 +2,28 @@ package com.gmail.perdenia.maciej.osmtrackingapp;
 
 public class User {
 
+    private int mId;
     private String mName;
     private String mSurname;
     private WayPoint mWayPoint;
 
-    public User(String name, String surname) {
+    public User(int id, String name, String surname) {
+        mId = id;
         mName = name;
         mSurname = surname;
-        mWayPoint = null;
     }
 
-    public User(String name, String surname, WayPoint wayPoint) {
-        mName = name;
-        mSurname = surname;
+    public User(int id, String name, String surname, WayPoint wayPoint) {
+        this(id, name, surname);
         mWayPoint = wayPoint;
+    }
+
+    public void setId(int id) {
+        mId = id;
+    }
+
+    public int getId() {
+        return mId;
     }
 
     public void setName(String name) {

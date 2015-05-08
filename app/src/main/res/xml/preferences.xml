@@ -1,22 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
 
     <PreferenceCategory
-        android:key="credentials-category-key"
+        android:key="user-data-category-key"
         android:title="@string/pref_title_user_data"
         >
 
         <EditTextPreference
+            android:key="user-id-key"
+            android:title="@string/pref_title_id"
+            android:defaultValue="@string/pref_default_value_id"
+            android:summary="@string/pref_summary_id"
+            android:inputType="number"
+            android:maxLength="6"
+            />
+
+        <EditTextPreference
             android:key="user-name-key"
             android:title="@string/pref_title_name"
-            android:defaultValue="Nieznany"
+            android:defaultValue="@string/pref_default_value_name"
             android:summary="@string/pref_summary_name"
             />
 
         <EditTextPreference
             android:key="user-surname-key"
             android:title="@string/pref_title_surname"
-            android:defaultValue="Nieznany"
+            android:defaultValue="@string/pref_default_value_name"
             android:summary="@string/pref_summary_surname"
             />
 
