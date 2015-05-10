@@ -18,25 +18,48 @@
         />
 
     <com.gmail.perdenia.maciej.osmtrackingapp.FloatingActionButton
-        android:id="@+id/fab_go_to_location"
+        android:id="@+id/fab_location"
         android:layout_width="@dimen/fab_size"
         android:layout_height="@dimen/fab_size"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginEnd="@dimen/fab_margin_right"
+        android:layout_above="@+id/fab_tracking"
+        android:layout_alignEnd="@+id/fab_tracking"
         android:layout_marginBottom="@dimen/fab_margin_bottom"
-        android:background="@drawable/fab_background"
+        android:background="@drawable/fab_background_location"
         android:elevation="@dimen/fab_elevation"
-        android:stateListAnimator="@animator/fab_elevation"
+        android:stateListAnimator="@animator/fab_anim"
         >
 
         <ImageView
             android:layout_width="@dimen/fab_icon_size"
             android:layout_height="@dimen/fab_icon_size"
             android:layout_gravity="center"
-            android:src="@drawable/fab_icons"
+            android:src="@drawable/fab_icons_location"
             android:duplicateParentState="true"
-            android:contentDescription="@string/img_view_desc_go_to_location"
+            android:contentDescription="@string/img_view_desc_location"
+            />
+
+    </com.gmail.perdenia.maciej.osmtrackingapp.FloatingActionButton>
+
+    <com.gmail.perdenia.maciej.osmtrackingapp.FloatingActionButton
+        android:id="@+id/fab_tracking"
+        android:layout_width="@dimen/fab_size"
+        android:layout_height="@dimen/fab_size"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="@dimen/fab_margin_right"
+        android:layout_marginBottom="@dimen/fab_margin_bottom"
+        android:background="@drawable/fab_background_tracking"
+        android:elevation="@dimen/fab_elevation"
+        android:stateListAnimator="@animator/fab_anim"
+        >
+
+        <ImageView
+            android:layout_width="@dimen/fab_icon_size"
+            android:layout_height="@dimen/fab_icon_size"
+            android:layout_gravity="center"
+            android:src="@drawable/fab_icons_tracking"
+            android:duplicateParentState="true"
+            android:contentDescription="@string/img_view_desc_tracking"
             />
 
     </com.gmail.perdenia.maciej.osmtrackingapp.FloatingActionButton>

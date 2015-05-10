@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:enterFadeDuration="@android:integer/config_shortAnimTime"
+    >
+
+    <item android:state_checked="true">
+        <bitmap android:src="@drawable/ic_marker" android:tint="@color/secondary_text"/>
+    </item>
+
+    <item>
+        <bitmap android:src="@drawable/ic_go_to_location" android:tint="@color/secondary_text"/>
+    </item>
+
+</selector>

@@ -18,13 +18,13 @@ public class FloatingActionButton extends FrameLayout implements Checkable {
         void onCheckedChanged(FloatingActionButton fabView, boolean isChecked);
     }
 
-    private static final int[] CHECKED_STATE_SET = {
-            android.R.attr.state_checked
-    };
-
     private boolean mChecked;
 
     private OnCheckedChangeListener mOnCheckedChangeListener;
+
+    private static final int[] CHECKED_STATE_SET = {
+            android.R.attr.state_checked
+    };
 
     public FloatingActionButton(Context context) {
         this(context, null, 0, 0);
@@ -57,6 +57,15 @@ public class FloatingActionButton extends FrameLayout implements Checkable {
         }
     }
 
+    public void setOnCheckedChangeListener(OnCheckedChangeListener listener) {
+        mOnCheckedChangeListener = listener;
+    }
+
+    @Override
+    public void toggle() {
+        setChecked(!mChecked);
+    }
+
     public void setChecked(boolean checked) {
         if (checked == mChecked) {
             return;
@@ -70,23 +79,14 @@ public class FloatingActionButton extends FrameLayout implements Checkable {
         }
     }
 
-    public void setOnCheckedChangeListener(OnCheckedChangeListener listener) {
-        mOnCheckedChangeListener = listener;
-    }
-
     @Override
     public boolean isChecked() {
         return mChecked;
     }
 
     @Override
-    public void toggle() {
-        setChecked(!mChecked);
-    }
-
-    @Override
     public boolean performClick() {
-        toggle();
+        //toggle();
         return super.performClick();
     }
 

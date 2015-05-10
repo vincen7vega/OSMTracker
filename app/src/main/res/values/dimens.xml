@@ -8,7 +8,9 @@
     <dimen name="fab_icon_size">24dp</dimen>
     <dimen name="fab_margin_bottom">16dp</dimen>
     <dimen name="fab_margin_right">16dp</dimen>
-    <dimen name="fab_elevation">8dp</dimen>
-    <dimen name="fab_press_translation_z">9dp</dimen>
+    <dimen name="fab_elevation">6dp</dimen>
+    <dimen name="fab_press_translation_z">6dp</dimen>
+
+    <dimen name="dialog_margin">24dp</dimen>
 
 </resources>

@@ -2,21 +2,24 @@
 <resources>
 
     <!--Główne tytuły-->
-    <string name="app_name">OSM Tracking App</string>
-
-    <!--Menu-->
-    <string name="title_activity_settings">Ustawienia</string>
+    <string name="app_name">OSM Tracker</string>
 
     <!--Floating Action Buttons-->
-    <string name="img_view_desc_go_to_location">Ikona przeniesienia do aktualnego położenia</string>
+    <string name="img_view_desc_location">
+        Wycentrowanie mapy do aktualnego położenia użytkownika lub
+        upload aktualnego położenia w postaci pliku GPX
+    </string>
+    <string name="img_view_desc_tracking">Uruchomienie/zatrzymanie śledzenia</string>
 
     <!--Okienka dialogowe-->
-    <string name="dialog_text_gpx_upload">Utworzono plik GPX. Przesłać na serwer OpenStreetMap?</string>
+    <string name="dialog_title_enable_gps">Włączyć GPS?</string>
+    <string name="dialog_title_upload_gpx">Upload pliku GPX</string>
     <string name="dialog_text_enable_gps">
         Do poprawnego działania aplikacji niezbędne są usługi
         lokalizacji. Przejdź do ustawień, aby je aktywować.
     </string>
-    <string name="dialog_text_upload_name">Wprowadź nazwę:</string>
+    <string name="dialog_text_name_wpt">Wprowadź nazwę wysyłanego punktu:</string>
+    <string name="dialog_text_name_trk">Wprowadź nazwę wysyłanego śladu:</string>
     <string name="dialog_btn_yes">Tak</string>
     <string name="dialog_btn_ok">OK</string>
     <string name="dialog_btn_no">Nie</string>

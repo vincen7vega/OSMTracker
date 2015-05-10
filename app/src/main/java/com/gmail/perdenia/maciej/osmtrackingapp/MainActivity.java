@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
@@ -21,7 +20,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -31,13 +30,16 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import org.osmdroid.DefaultResourceProxyImpl;
+import org.osmdroid.bonuspack.overlays.Marker;
 import org.osmdroid.bonuspack.overlays.Polyline;
+import org.osmdroid.events.MapListener;
+import org.osmdroid.events.ScrollEvent;
+import org.osmdroid.events.ZoomEvent;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.util.BoundingBoxE6;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapController;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.ItemizedIconOverlay;
-import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
 
 import java.text.SimpleDateFormat;
@@ -46,17 +48,15 @@ import java.util.Date;
 import java.util.Locale;
 
 public class MainActivity extends ActionBarActivity implements GoogleApiClient.ConnectionCallbacks,
-                                     GoogleApiClient.OnConnectionFailedListener, LocationListener,
-        FloatingActionButton.OnCheckedChangeListener {
+                                     GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     public static final String TAG = MainActivity.class.getSimpleName();
 
     private static final String LOCATION_KEY = "location-key";
     private static final String LAST_UPDATE_TIME_KEY = "last-update-time-key";
     private static final String REQUESTING_TRACKING_KEY = "requesting-tracking-key";
-    private static final String MAP_VIEW_CENTER_LAT_KEY = "map-view-center-lat-key";
-    private static final String MAP_VIEW_CENTER_LON_KEY = "map-view-center-lon-key";
-    private static final String MAP_VIEW_ZOOM_KEY = "map-view-zoom-key";
+    private static final String MAP_CENTER_KEY = "map-center-key";
+    private static final String MAP_ZOOM_KEY = "map-zoom-key";
     private static final String TRACK_OVERLAY_POINTS_KEY = "track-overlay-points-key";
     private static final String GPX_FILENAME_KEY = "gpx-filename-key";
     private static final String TRACK_POINTS_KEY = "track-points-key";
@@ -80,11 +80,11 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
 
     private MapView mMapView;
     private MapController mMapController;
-
     private GeoPoint mCurrentGeoPoint;
     private GeoPoint mSavedMapCenter;
 
-    private FloatingActionButton mGoToLocationFab;
+    private FloatingActionButton mLocationFab;
+    private FloatingActionButton mTrackingFab;
 
     private boolean mRequestingTracking;
     private org.osmdroid.bonuspack.overlays.Polyline mTrackOverlay;
@@ -101,7 +101,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        PreferenceManager.setDefaultValues(this, R.xml.user_data, false);
 
         init();
         updateValuesFromBundle(savedInstanceState);
@@ -114,16 +114,58 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        mLocationFab = (FloatingActionButton) findViewById(R.id.fab_location);
+        mLocationFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!isGpsEnabled()) {
+                    buildGpsAlertDialog();
+                }
+                if (mLocationFab.isChecked()) {
+                    saveWayPoint();
+                } else {
+                    goToCurrentLocation();
+                }
+            }
+        });
+
+        mTrackingFab = (FloatingActionButton) findViewById(R.id.fab_tracking);
+        mTrackingFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mTrackingFab.isChecked()) {
+                    if (!isGpsEnabled()) {
+                        buildGpsAlertDialog();
+                    }
+                    startTracking();
+                } else {
+                    stopTracking();
+                }
+                mTrackingFab.toggle();
+            }
+        });
+
         mMapView = (MapView) findViewById(R.id.map_view);
         mMapView.setTileSource(TileSourceFactory.MAPNIK);
         mMapView.setMultiTouchControls(true);
+        mMapView.setMapListener(new MapListener() {
+            @Override
+            public boolean onScroll(ScrollEvent event) {
+                setLocationFabState();
+                return true;
+            }
+
+            @Override
+            public boolean onZoom(ZoomEvent event) {
+                setLocationFabState();
+                return true;
+            }
+        });
         mMapController = (MapController) mMapView.getController();
         mMapController.setZoom(PREFERRED_ZOOM);
 
         mRequestingTracking = false;
         mGpxFilename = "";
-
-        mGoToLocationFab = (FloatingActionButton) findViewById(R.id.fab_go_to_location);
 
         final SharedPreferences sharedPreferences =
                 PreferenceManager.getDefaultSharedPreferences(this);
@@ -155,56 +197,27 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
             mMapView.getOverlays().add(mTrackOverlay);
         }
 
-        ArrayList<OverlayItem> overlayItems = new ArrayList<>(1);
-        OverlayItem currentLocationItem =
-                new OverlayItem("Ty", "Twoje aktualne położenie", mCurrentGeoPoint);
-        overlayItems.add(currentLocationItem);
-        ItemizedIconOverlay<OverlayItem> currentLocationOverlay =
-                new ItemizedIconOverlay<>(overlayItems,
-                        new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
-                            @Override
-                            public boolean onItemSingleTapUp(final int index,
-                                                             final OverlayItem item) {
-                                Toast.makeText(getApplicationContext(), item.getTitle() + "\n"
-                                                + item.getSnippet(), Toast.LENGTH_LONG).show();
-                                return true;
-                            }
-                            @Override
-                            public boolean onItemLongPress(final int index,
-                                                           final OverlayItem item) {
-                                return false;
-                            }
-                }, new DefaultResourceProxyImpl(this));
-        mMapView.getOverlays().add(currentLocationOverlay);
+        Marker userMarker = new Marker(mMapView);
+        userMarker.setPosition(mCurrentGeoPoint);
+        userMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        userMarker.setIcon(getResources().getDrawable(R.drawable.map_icon_user_location));
+        userMarker.setTitle(mUser.getName() + " " + mUser.getSurname());
+        userMarker.setSnippet("Twoje aktualne położenie");
+        mMapView.getOverlays().add(userMarker);
 
         if (mOtherUsers.size() > 0) {
-            ArrayList<OverlayItem> usersOverlayItems = new ArrayList<>(mOtherUsers.size());
             for (User u : mOtherUsers) {
-                String fullName = u.getName() + " " + u.getSurname();
-                OverlayItem userItem = new OverlayItem(fullName,
-                        "Położenie użytkownika " + fullName, new GeoPoint(
+                Marker otherUserMarker = new Marker(mMapView);
+                otherUserMarker.setPosition(new GeoPoint(
                         u.getWayPoint().getLatitude(), u.getWayPoint().getLongitude()));
-                usersOverlayItems.add(userItem);
+                otherUserMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                otherUserMarker.setIcon(
+                        getResources().getDrawable(R.drawable.map_icon_other_users_location));
+                otherUserMarker.setTitle(u.getName() + " " + u.getSurname());
+                otherUserMarker.setSnippet("Położenie powyższego użytkownika");
+                mMapView.getOverlays().add(otherUserMarker);
             }
-            ItemizedIconOverlay<OverlayItem> usersOverlay =
-                    new ItemizedIconOverlay<>(usersOverlayItems,
-                            new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
-                                @Override
-                                public boolean onItemSingleTapUp(final int index,
-                                                                 final OverlayItem item) {
-                                    Toast.makeText(getApplicationContext(), item.getTitle() + "\n"
-                                            + item.getSnippet(), Toast.LENGTH_LONG).show();
-                                    return true;
-                                }
-                                @Override
-                                public boolean onItemLongPress(final int index,
-                                                               final OverlayItem item) {
-                                    return false;
-                                }
-                            }, new DefaultResourceProxyImpl(this));
-            mMapView.getOverlays().add(usersOverlay);
         }
-
         mMapView.invalidate();
     }
 
@@ -308,11 +321,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         updateUI();
     }
 
-    public void goToCurrentLocation(View view) {
-        if (!isGpsEnabled()) {
-            buildGpsAlertDialog();
-        }
-
+    private void goToCurrentLocation() {
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (mCurrentLocation != null) {
             mCurrentGeoPoint = new GeoPoint(mCurrentLocation.getLatitude(),
@@ -332,15 +341,45 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         }
     }
 
-/*    public void startTracking(View view) {
-        if (!isGpsEnabled()) {
-            buildGpsAlertDialog();
+    private void saveWayPoint() {
+        if (mCurrentLocation != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US);
+            mGpxFilename = sdf.format(mLastUpdateTime) + "_" + mUser.getSurname() + "_"
+                    + mUser.getName();
+            WayPoint wayPoint = new WayPoint(mCurrentLocation.getLatitude(),
+                    mCurrentLocation.getLongitude(), mLastUpdateTime, mCurrentLocation.getAltitude());
+            buildUploadAlertDialog(
+                    getResources().getString(R.string.dialog_text_name_wpt), wayPoint);
         }
+    }
 
+    private void setLocationFabState() {
+        if (mCurrentLocation != null) {
+            BoundingBoxE6 boundingBox = mMapView.getBoundingBox();
+            double latNorth = (double) boundingBox.getLatNorthE6() / 1000000;
+            double lonWest = (double) boundingBox.getLonWestE6() / 1000000;
+            double latSouth = (double) boundingBox.getLatSouthE6() / 1000000;
+            double lonEast = (double) boundingBox.getLonEastE6() / 1000000;
+
+            double lat = mCurrentLocation.getLatitude();
+            double lon = mCurrentLocation.getLongitude();
+
+            int zoom = mMapView.getZoomLevel();
+
+            if (lat < latNorth && lat > latSouth &&
+                    lon > lonWest && lon < lonEast && zoom == PREFERRED_ZOOM) {
+                mLocationFab.setChecked(true);
+            } else {
+                mLocationFab.setChecked(false);
+            }
+        }
+    }
+
+    private void startTracking() {
         if (!mRequestingTracking) {
             if (mCurrentLocation != null) {
                 mTrackOverlay = new Polyline(new DefaultResourceProxyImpl(this));
-                mTrackOverlay.setColor(getResources().getColor(R.color.accent));
+                mTrackOverlay.setColor(getResources().getColor(R.color.blue_A700));
                 mTrackOverlayPoints = new ArrayList<>();
 
                 mTrackPoints = new ArrayList<>();
@@ -354,38 +393,19 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
                         + mUser.getName();
 
                 mRequestingTracking = true;
-                setTrackingButtonsState();
             }
         }
     }
 
-    public void stopTracking(View view) {
+    private void stopTracking() {
         if (mRequestingTracking) {
             mRequestingTracking = false;
-            setTrackingButtonsState();
             if (!mTrackPoints.isEmpty()) {
-                buildUploadAlertDialog(null);
+                buildUploadAlertDialog(
+                        getResources().getString(R.string.dialog_text_name_trk), null);
             }
+            updateUI();
         }
-    }
-
-    private void setTrackingButtonsState() {
-        if (mRequestingTracking) {
-            mStartTrackingBtn.setEnabled(false);
-            mStopTrackingBtn.setEnabled(true);
-        } else {
-            mStartTrackingBtn.setEnabled(true);
-            mStopTrackingBtn.setEnabled(false);
-        }
-    }*/
-
-    public void saveWayPoint(View view) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US);
-        mGpxFilename = sdf.format(mLastUpdateTime) + "_" + mUser.getSurname() + "_"
-                + mUser.getName();
-        WayPoint wayPoint = new WayPoint(mCurrentLocation.getLatitude(),
-                mCurrentLocation.getLongitude(), mLastUpdateTime, mCurrentLocation.getAltitude());
-        buildUploadAlertDialog(wayPoint);
     }
 
     @Override
@@ -426,11 +446,12 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
 
         savedInstanceState.putBoolean(REQUESTING_TRACKING_KEY, mRequestingTracking);
 
-        savedInstanceState.putDouble(
-                MAP_VIEW_CENTER_LAT_KEY, mMapView.getMapCenter().getLatitude());
-        savedInstanceState.putDouble(
-                MAP_VIEW_CENTER_LON_KEY, mMapView.getMapCenter().getLongitude());
-        savedInstanceState.putInt(MAP_VIEW_ZOOM_KEY, mMapView.getZoomLevel());
+        Location mapCenter = new Location("dummyprovider");
+        mapCenter.setLatitude(mMapView.getMapCenter().getLatitude());
+        mapCenter.setLongitude(mMapView.getMapCenter().getLongitude());
+        savedInstanceState.putParcelable(MAP_CENTER_KEY, mapCenter);
+
+        savedInstanceState.putInt(MAP_ZOOM_KEY, mMapView.getZoomLevel());
         savedInstanceState.putParcelableArrayList(TRACK_OVERLAY_POINTS_KEY, mTrackOverlayPoints);
 
         savedInstanceState.putString(GPX_FILENAME_KEY, mGpxFilename);
@@ -445,35 +466,34 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         if (savedInstanceState != null) {
             if (savedInstanceState.keySet().contains(LOCATION_KEY)) {
                 mCurrentLocation = savedInstanceState.getParcelable(LOCATION_KEY);
-                mCurrentGeoPoint = new GeoPoint(
-                        mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+                if (mCurrentLocation != null) {
+                    mCurrentGeoPoint = new GeoPoint(
+                            mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+                }
             }
 
             if(savedInstanceState.keySet().contains(LAST_UPDATE_TIME_KEY)) {
                 mLastUpdateTime = (Date) savedInstanceState.getSerializable(LAST_UPDATE_TIME_KEY);
             }
 
-            if (savedInstanceState.keySet().contains(MAP_VIEW_CENTER_LAT_KEY) &&
-                    savedInstanceState.keySet().contains(MAP_VIEW_CENTER_LON_KEY)) {
-                mSavedMapCenter =
-                        new GeoPoint(savedInstanceState.getDouble(MAP_VIEW_CENTER_LAT_KEY),
-                                savedInstanceState.getDouble(MAP_VIEW_CENTER_LON_KEY));
+            if (savedInstanceState.keySet().contains(MAP_CENTER_KEY)) {
+                Location mapCenter = savedInstanceState.getParcelable(MAP_CENTER_KEY);
+                mSavedMapCenter = new GeoPoint(mapCenter.getLatitude(), mapCenter.getLongitude());
             }
 
-            if (savedInstanceState.keySet().contains(MAP_VIEW_ZOOM_KEY)) {
-                mMapController.setZoom(savedInstanceState.getInt(MAP_VIEW_ZOOM_KEY));
+            if (savedInstanceState.keySet().contains(MAP_ZOOM_KEY)) {
+                mMapController.setZoom(savedInstanceState.getInt(MAP_ZOOM_KEY));
             }
 
             if (savedInstanceState.keySet().contains(REQUESTING_TRACKING_KEY)) {
                 mRequestingTracking = savedInstanceState.getBoolean(REQUESTING_TRACKING_KEY);
-                //setTrackingButtonsState();
+                mTrackingFab.setChecked(mRequestingTracking);
             }
 
             if (savedInstanceState.keySet().contains(TRACK_OVERLAY_POINTS_KEY) &&
                     mRequestingTracking) {
                 mTrackOverlay = new Polyline(new DefaultResourceProxyImpl(this));
-                mTrackOverlay.setColor(
-                        getResources().getColor(getResources().getColor(R.color.accent)));
+                mTrackOverlay.setColor(getResources().getColor(R.color.blue_A700));
                 mTrackOverlayPoints =
                         savedInstanceState.getParcelableArrayList(TRACK_OVERLAY_POINTS_KEY);
                 mTrackOverlay.setPoints(mTrackOverlayPoints);
@@ -498,8 +518,8 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         return true;
     }
 
-    public void openSettings(MenuItem item) {
-        Intent intent = new Intent(this, SettingsActivity.class);
+    public void openUserData(MenuItem item) {
+        Intent intent = new Intent(this, UserDataActivity.class);
         startActivity(intent);
     }
 
@@ -513,7 +533,9 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
 
     private void buildGpsAlertDialog() {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setTitle(getResources().getString(R.string.dialog_title_enable_gps));
         dialog.setMessage(getResources().getString(R.string.dialog_text_enable_gps));
+        dialog.setIcon(R.drawable.dialog_icon_gps);
         dialog.setPositiveButton(getResources().getString(R.string.dialog_btn_ok),
                 new DialogInterface.OnClickListener() {
                     @Override
@@ -546,17 +568,29 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         mOtherUsers = otherUsers;
     }
 
-    private void buildUploadAlertDialog(final WayPoint wayPoint) {
+    private void buildUploadAlertDialog(String message, final WayPoint wayPoint) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-        dialog.setMessage(getResources().getString(R.string.dialog_text_upload_name));
+        dialog.setTitle(getResources().getString(R.string.dialog_title_upload_gpx));
+        dialog.setMessage(message);
+        dialog.setIcon(R.drawable.dialog_icon_upload);
 
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        int margin = (int) getResources().getDimension(R.dimen.dialog_margin);
+        params.setMargins(margin, 0, margin, 0);
         final EditText input = new EditText(this);
-        dialog.setView(input);
+        layout.addView(input, params);
+        dialog.setView(layout);
 
         dialog.setPositiveButton(getResources().getString(R.string.dialog_btn_ok),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface paramDialogInterface, int paramInt) {
                         String name = input.getText().toString();
+                        if (name.equals("")) {
+                            name = mGpxFilename;
+                        }
                         saveAndSendGpx(name, wayPoint);
                     }
         });
@@ -564,7 +598,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         dialog.setNegativeButton(getResources().getString(R.string.dialog_btn_cancel),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        saveAndSendGpx(mGpxFilename, wayPoint);
+
                     }
                 });
 
@@ -589,11 +623,9 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         if (isOnline()) {
             new Thread(
                     new Client(MainActivity.this, mUser, new String(gpx))).start();
+        } else {
+            Toast.makeText(this, "Niepowodzenie - brak dostępu do Internetu",
+                    Toast.LENGTH_LONG).show();
         }
-    }
-
-    @Override
-    public void onCheckedChanged(FloatingActionButton fabView, boolean isChecked) {
-        // TODO reakcja na zmianę stanu fab'a
     }
 }
