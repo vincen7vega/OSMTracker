@@ -18,8 +18,7 @@
         Do poprawnego działania aplikacji niezbędne są usługi
         lokalizacji. Przejdź do ustawień, aby je aktywować.
     </string>
-    <string name="dialog_text_name_wpt">Wprowadź nazwę wysyłanego punktu:</string>
-    <string name="dialog_text_name_trk">Wprowadź nazwę wysyłanego śladu:</string>
+    <string name="dialog_text_name_gpx_object">Wprowadź nazwę wysyłanego punktu/śladu:</string>
     <string name="dialog_btn_yes">Tak</string>
     <string name="dialog_btn_ok">OK</string>
     <string name="dialog_btn_no">Nie</string>

@@ -1,8 +1,6 @@
 package com.gmail.perdenia.maciej.osmtrackingapp;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -19,8 +17,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -48,9 +46,13 @@ import java.util.Date;
 import java.util.Locale;
 
 public class MainActivity extends ActionBarActivity implements GoogleApiClient.ConnectionCallbacks,
-                                     GoogleApiClient.OnConnectionFailedListener, LocationListener {
+                                     GoogleApiClient.OnConnectionFailedListener, LocationListener,
+        GpsDialogFragment.OkCancelListener, UploadDialogFragment.OkCancelListener{
 
     public static final String TAG = MainActivity.class.getSimpleName();
+
+    private static final String GPS_DIALOG_TAG = "gps-dialog-tag";
+    private static final String UPLOAD_DIALOG_TAG = "upload-dialog-tag";
 
     private static final String LOCATION_KEY = "location-key";
     private static final String LAST_UPDATE_TIME_KEY = "last-update-time-key";
@@ -60,14 +62,15 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     private static final String TRACK_OVERLAY_POINTS_KEY = "track-overlay-points-key";
     private static final String GPX_FILENAME_KEY = "gpx-filename-key";
     private static final String TRACK_POINTS_KEY = "track-points-key";
+    private static final String WAY_POINT_KEY = "way-point-key";
 
     private static final String USER_ID_KEY = "user-id-key";
     private static final String USER_NAME_KEY = "user-name-key";
     private static final String USER_SURNAME_KEY = "user-surname-key";
 
-    public static final int PREFERRED_ZOOM = 18;
-    public static final int UPDATE_INTERVAL_IN_MILLIS = 5000;
-    public static final int FASTEST_UPDATE_INTERVAL_IN_MILLIS =
+    private static final int PREFERRED_ZOOM = 18;
+    private static final int UPDATE_INTERVAL_IN_MILLIS = 5000;
+    private static final int FASTEST_UPDATE_INTERVAL_IN_MILLIS =
             UPDATE_INTERVAL_IN_MILLIS / 2;
 
     private LocationManager mLocationManager;
@@ -90,6 +93,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     private org.osmdroid.bonuspack.overlays.Polyline mTrackOverlay;
     private ArrayList<GeoPoint> mTrackOverlayPoints;
     private ArrayList<WayPoint> mTrackPoints;
+    private WayPoint mWayPoint;
     private String mGpxFilename;
 
     private SharedPreferences.OnSharedPreferenceChangeListener mPrefChangeListener;
@@ -112,6 +116,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         Log.i(TAG, "Inicjalizacja zmiennych (init())");
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setLogo(R.mipmap.ic_launcher);
         setSupportActionBar(toolbar);
 
         mLocationFab = (FloatingActionButton) findViewById(R.id.fab_location);
@@ -119,7 +124,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
             @Override
             public void onClick(View v) {
                 if (!isGpsEnabled()) {
-                    buildGpsAlertDialog();
+                    new GpsDialogFragment().show(getFragmentManager(), GPS_DIALOG_TAG);
                 }
                 if (mLocationFab.isChecked()) {
                     saveWayPoint();
@@ -135,7 +140,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
             public void onClick(View v) {
                 if (!mTrackingFab.isChecked()) {
                     if (!isGpsEnabled()) {
-                        buildGpsAlertDialog();
+                        new GpsDialogFragment().show(getFragmentManager(), GPS_DIALOG_TAG);
                     }
                     startTracking();
                 } else {
@@ -189,7 +194,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
 
         mMapView.getOverlays().clear();
 
-        mMapView.getOverlays().add(new ScaleBarOverlay(this));
+//        mMapView.getOverlays().add(new ScaleBarOverlay(this));
 
         if (mRequestingTracking) {
             mTrackOverlayPoints.add(mCurrentGeoPoint);
@@ -346,10 +351,10 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US);
             mGpxFilename = sdf.format(mLastUpdateTime) + "_" + mUser.getSurname() + "_"
                     + mUser.getName();
-            WayPoint wayPoint = new WayPoint(mCurrentLocation.getLatitude(),
-                    mCurrentLocation.getLongitude(), mLastUpdateTime, mCurrentLocation.getAltitude());
-            buildUploadAlertDialog(
-                    getResources().getString(R.string.dialog_text_name_wpt), wayPoint);
+            mWayPoint = new WayPoint(
+                    mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(),
+                    mLastUpdateTime, mCurrentLocation.getAltitude());
+            new UploadDialogFragment().show(getFragmentManager(), UPLOAD_DIALOG_TAG);
         }
     }
 
@@ -378,6 +383,9 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     private void startTracking() {
         if (!mRequestingTracking) {
             if (mCurrentLocation != null) {
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                Toast.makeText(this, "Rozpoczęto śledzenie", Toast.LENGTH_LONG).show();
+
                 mTrackOverlay = new Polyline(new DefaultResourceProxyImpl(this));
                 mTrackOverlay.setColor(getResources().getColor(R.color.blue_A700));
                 mTrackOverlayPoints = new ArrayList<>();
@@ -401,10 +409,10 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         if (mRequestingTracking) {
             mRequestingTracking = false;
             if (!mTrackPoints.isEmpty()) {
-                buildUploadAlertDialog(
-                        getResources().getString(R.string.dialog_text_name_trk), null);
+                new UploadDialogFragment().show(getFragmentManager(), UPLOAD_DIALOG_TAG);
             }
             updateUI();
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
     }
 
@@ -456,6 +464,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
 
         savedInstanceState.putString(GPX_FILENAME_KEY, mGpxFilename);
         savedInstanceState.putParcelableArrayList(TRACK_POINTS_KEY, mTrackPoints);
+        savedInstanceState.putParcelable(WAY_POINT_KEY, mWayPoint);
 
         super.onSaveInstanceState(savedInstanceState);
     }
@@ -507,7 +516,9 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
                 mTrackPoints = savedInstanceState.getParcelableArrayList(TRACK_POINTS_KEY);
             }
 
-            updateUI();
+            if (savedInstanceState.keySet().contains(WAY_POINT_KEY)) {
+                mWayPoint = savedInstanceState.getParcelable(WAY_POINT_KEY);
+            }
         }
     }
 
@@ -531,29 +542,6 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         return mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
 
-    private void buildGpsAlertDialog() {
-        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-        dialog.setTitle(getResources().getString(R.string.dialog_title_enable_gps));
-        dialog.setMessage(getResources().getString(R.string.dialog_text_enable_gps));
-        dialog.setIcon(R.drawable.dialog_icon_gps);
-        dialog.setPositiveButton(getResources().getString(R.string.dialog_btn_ok),
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                        startActivityForResult(intent, 1);
-                    }
-                });
-        dialog.setNegativeButton(getString(R.string.dialog_btn_cancel),
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-
-                    }
-                });
-        dialog.show();
-    }
-
     private boolean isOnline() {
         if (mConnectivityManager == null) {
             mConnectivityManager =
@@ -568,51 +556,15 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         mOtherUsers = otherUsers;
     }
 
-    private void buildUploadAlertDialog(String message, final WayPoint wayPoint) {
-        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-        dialog.setTitle(getResources().getString(R.string.dialog_title_upload_gpx));
-        dialog.setMessage(message);
-        dialog.setIcon(R.drawable.dialog_icon_upload);
-
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        int margin = (int) getResources().getDimension(R.dimen.dialog_margin);
-        params.setMargins(margin, 0, margin, 0);
-        final EditText input = new EditText(this);
-        layout.addView(input, params);
-        dialog.setView(layout);
-
-        dialog.setPositiveButton(getResources().getString(R.string.dialog_btn_ok),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                        String name = input.getText().toString();
-                        if (name.equals("")) {
-                            name = mGpxFilename;
-                        }
-                        saveAndSendGpx(name, wayPoint);
-                    }
-        });
-
-        dialog.setNegativeButton(getResources().getString(R.string.dialog_btn_cancel),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-
-                    }
-                });
-
-        dialog.show();
-    }
-
-    private void saveAndSendGpx(String name, WayPoint wayPoint) {
+    private void saveAndSendGpx(String name) {
         char[] gpx;
-        if (wayPoint != null) {
+        if (mWayPoint != null) {
             gpx = GpxCreator.createGpxWayPoint(
-                    MainActivity.this, mGpxFilename, name, wayPoint);
+                    MainActivity.this, mGpxFilename, name, mWayPoint);
             GpxCreator.saveOnInternalStorage(
                     MainActivity.this, mGpxFilename, new String(gpx));
             GpxCreator.saveOnExternalStorage(mGpxFilename, new String(gpx));
+            mWayPoint = null;
         } else {
             gpx = GpxCreator.createGpxTrack(
                     MainActivity.this, mGpxFilename, name, mTrackPoints);
@@ -624,8 +576,33 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
             new Thread(
                     new Client(MainActivity.this, mUser, new String(gpx))).start();
         } else {
-            Toast.makeText(this, "Niepowodzenie - brak dostępu do Internetu",
-                    Toast.LENGTH_LONG).show();
+            Toast.makeText(
+                    this, "Niepowodzenie - brak dostępu do Internetu", Toast.LENGTH_LONG).show();
         }
+    }
+
+    @Override
+    public void gpsOnOk() {
+        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+        startActivityForResult(intent, 1);
+    }
+
+    @Override
+    public void gpsOnCancel() {
+
+    }
+
+    @Override
+    public void uploadOnOk(EditText input) {
+        String name = input.getText().toString();
+        if (name.equals("")) {
+            name = mGpxFilename;
+        }
+        saveAndSendGpx(name);
+    }
+
+    @Override
+    public void uploadOnCancel() {
+
     }
 }

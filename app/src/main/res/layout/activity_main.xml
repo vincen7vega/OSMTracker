@@ -6,21 +6,21 @@
     tools:context=".MainActivity"
     >
 
-    <include
-        android:id="@+id/toolbar"
-        layout="@layout/toolbar"
-        />
-
     <org.osmdroid.views.MapView
         android:id="@+id/map_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
 
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar"
+        />
+
     <com.gmail.perdenia.maciej.osmtrackingapp.FloatingActionButton
         android:id="@+id/fab_location"
-        android:layout_width="@dimen/fab_size"
-        android:layout_height="@dimen/fab_size"
+        android:layout_width="@dimen/fab_size_with_shadows"
+        android:layout_height="@dimen/fab_size_with_shadows"
         android:layout_above="@+id/fab_tracking"
         android:layout_alignRight="@+id/fab_tracking"
         android:layout_alignEnd="@+id/fab_tracking"
@@ -41,8 +41,8 @@
 
     <com.gmail.perdenia.maciej.osmtrackingapp.FloatingActionButton
         android:id="@+id/fab_tracking"
-        android:layout_width="@dimen/fab_size"
-        android:layout_height="@dimen/fab_size"
+        android:layout_width="@dimen/fab_size_with_shadows"
+        android:layout_height="@dimen/fab_size_with_shadows"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"

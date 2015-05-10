@@ -6,15 +6,15 @@
     tools:context=".MainActivity"
     >
 
-    <include
-        android:id="@+id/toolbar"
-        layout="@layout/toolbar"
-        />
-
     <org.osmdroid.views.MapView
         android:id="@+id/map_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        />
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar"
         />
 
     <com.gmail.perdenia.maciej.osmtrackingapp.FloatingActionButton

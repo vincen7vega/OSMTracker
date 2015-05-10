@@ -23,7 +23,7 @@ public class Client implements Runnable {
     public static final String TAG = Client.class.getSimpleName();
 
     private static final int SERVER_PORT = 60000;
-    private static final String SERVER_IP = "83.8.99.178";
+    private static final String SERVER_IP = "83.25.154.121";
 
     private MainActivity mContext;
     private User mUser;
@@ -63,7 +63,13 @@ public class Client implements Runnable {
                 InputStream inFromServer = client.getInputStream();
                 DataInputStream in = new DataInputStream(inFromServer);
                 Log.i(TAG, "Odpowiedź serwera: " + in.readUTF());
-                Toast.makeText(mContext, "Plik zapisano na serwerze", Toast.LENGTH_LONG).show();
+                mContext.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(
+                                mContext, "Plik zapisano na serwerze", Toast.LENGTH_LONG).show();
+                    }
+                });
             } else {
                 JSONObject jsonToSend = new JSONObject();
                 jsonToSend.put("id", mUser.getId());
@@ -90,7 +96,7 @@ public class Client implements Runnable {
                 ArrayList<User> otherUsers = new ArrayList<>();
                 for (int i = 0; i < jsonArrayReceived.size(); i++) {
                     JSONObject userReceived = (JSONObject) jsonArrayReceived.get(i);
-                    int idReceived = (int) userReceived.get("id");
+                    long idReceived = (long) userReceived.get("id");
                     String nameReceived = (String) userReceived.get("name");
                     String surnameReceived = (String) userReceived.get("surname");
                     JSONObject locationReceived = (JSONObject) userReceived.get("location");
@@ -99,11 +105,12 @@ public class Client implements Runnable {
                     String timeReceivedString = (String) userReceived.get("time");
                     WayPoint wayPoint = new WayPoint(latitudeReceived, longitudeReceived,
                             timeReceivedString);
-                    otherUsers.add(new User(idReceived, nameReceived, surnameReceived, wayPoint));
+                    otherUsers.add(
+                            new User((int) idReceived, nameReceived, surnameReceived, wayPoint));
                 }
 
                 for(User u : otherUsers) {
-                    Log.i(TAG, u.getId() + " " + u.getName() + " " + u.getSurname() + ", " +
+                    Log.i(TAG, "ID" + u.getId() + " " + u.getName() + " " + u.getSurname() + ", " +
                             u.getWayPoint().getLatitude() + "/" + u.getWayPoint().getLongitude() +
                             ", " + u.getWayPoint().getTimeString());
                 }
