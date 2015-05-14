@@ -17,7 +17,7 @@
         layout="@layout/toolbar"
         />
 
-    <com.gmail.perdenia.maciej.osmtrackingapp.FloatingActionButton
+    <com.gmail.perdenia.maciej.osmtracker.FloatingActionButton
         android:id="@+id/fab_location"
         android:layout_width="@dimen/fab_size_with_shadows"
         android:layout_height="@dimen/fab_size_with_shadows"
@@ -37,9 +37,9 @@
             android:contentDescription="@string/img_view_desc_location"
             />
 
-    </com.gmail.perdenia.maciej.osmtrackingapp.FloatingActionButton>
+    </com.gmail.perdenia.maciej.osmtracker.FloatingActionButton>
 
-    <com.gmail.perdenia.maciej.osmtrackingapp.FloatingActionButton
+    <com.gmail.perdenia.maciej.osmtracker.FloatingActionButton
         android:id="@+id/fab_tracking"
         android:layout_width="@dimen/fab_size_with_shadows"
         android:layout_height="@dimen/fab_size_with_shadows"
@@ -61,6 +61,6 @@
             android:contentDescription="@string/img_view_desc_tracking"
             />
 
-    </com.gmail.perdenia.maciej.osmtrackingapp.FloatingActionButton>
+    </com.gmail.perdenia.maciej.osmtracker.FloatingActionButton>
 
 </RelativeLayout>

@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!--Podstawowe kolory aplikacji-->
     <color name="primary">#E0E0E0</color>
     <color name="primary_dark">#757575</color>
     <color name="accent">#00C853</color>
 
+    <!--Podstawowe kolory związane z tekstem-->
     <color name="primary_text">#DE000000</color>
     <color name="secondary_text">#8A000000</color>
     <color name="hints">#42000000</color>

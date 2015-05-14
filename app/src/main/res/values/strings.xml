@@ -3,6 +3,7 @@
 
     <!--Główne tytuły-->
     <string name="app_name">OSM Tracker</string>
+    <string name="settings">Ustawienia</string>
 
     <!--Floating Action Buttons-->
     <string name="img_view_desc_location">
@@ -18,21 +19,31 @@
         Do poprawnego działania aplikacji niezbędne są usługi
         lokalizacji. Przejdź do ustawień, aby je aktywować.
     </string>
-    <string name="dialog_text_name_gpx_object">Wprowadź nazwę wysyłanego punktu/śladu:</string>
+    <string name="dialog_text_upload_gpx">
+        Upewnij się, że masz dostęp do Internetu, a następnie
+        wprowadź nazwę wysyłanego punktu/śladu:
+    </string>
     <string name="dialog_btn_yes">Tak</string>
     <string name="dialog_btn_ok">OK</string>
     <string name="dialog_btn_no">Nie</string>
     <string name="dialog_btn_cancel">Anuluj</string>
 
     <!--Ekran preferencji-->
-    <string name="pref_title_user_data">Dane użytkownika</string>
+    <string name="pref_cat_title_user_data">Dane użytkownika</string>
+    <string name="pref_cat_title_server_data">Dane serwera</string>
     <string name="pref_title_id">ID</string>
     <string name="pref_title_name">Imię</string>
     <string name="pref_title_surname">Nazwisko</string>
+    <string name="pref_title_server_ip">IP</string>
+    <string name="pref_title_server_port">Port</string>
     <string name="pref_summary_id">Twoje ID</string>
     <string name="pref_summary_name">Twoje imię</string>
     <string name="pref_summary_surname">Twoje nazwisko</string>
-    <string name="pref_default_value_id">000000</string>
+    <string name="pref_summary_server_ip">Adres IP serwera</string>
+    <string name="pref_summary_server_port">Numer portu serwera</string>
+    <string name="pref_default_value_id">0</string>
     <string name="pref_default_value_name">Nieznane</string>
+    <string name="pref_default_value_server_ip">0.0.0.0</string>
+    <string name="pref_default_value_server_port">0</string>
 
 </resources>
