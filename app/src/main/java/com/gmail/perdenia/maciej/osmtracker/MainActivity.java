@@ -171,7 +171,9 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
             }
         });
         mMapController = (MapController) mMapView.getController();
-        mMapController.setZoom(PREFERRED_ZOOM);
+        mMapController.setZoom(6);
+        GeoPoint poland = new GeoPoint(52.0, 20.0);
+        mMapController.setCenter(poland);
 
         mRequestingTracking = false;
         mGpxFilename = "";
@@ -188,20 +190,29 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
             public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
                 switch (key) {
                     case USER_ID_KEY:
-                        mUser.setId(Integer.valueOf(sharedPreferences.getString(USER_ID_KEY, "0")));
+                        String newUserId = sharedPreferences.getString(USER_ID_KEY, "0");
+                        mUser.setId(Integer.valueOf(newUserId));
+                        Log.i(TAG, "Nowe ID użytkownika: " + newUserId);
                         break;
                     case USER_NAME_KEY:
-                        mUser.setName(sharedPreferences.getString(USER_NAME_KEY, ""));
+                        String newUserName = sharedPreferences.getString(USER_NAME_KEY, "");
+                        mUser.setName(newUserName);
+                        Log.i(TAG, "Nowe imię użytkownika: " + newUserName);
                         break;
                     case USER_SURNAME_KEY:
-                        mUser.setSurname(sharedPreferences.getString(USER_SURNAME_KEY, ""));
+                        String newUserSurname = sharedPreferences.getString(USER_SURNAME_KEY, "");
+                        mUser.setSurname(newUserSurname);
+                        Log.i(TAG, "Nowe nazwisko użytkownika: " + newUserSurname);
                         break;
                     case SERVER_IP_KEY:
-                        mServerIp = sharedPreferences.getString(SERVER_IP_KEY, "");
+                        String newServerIp = sharedPreferences.getString(SERVER_IP_KEY, "");
+                        mServerIp = newServerIp;
+                        Log.i(TAG, "Nowe IP serwera: " + newServerIp);
                         break;
                     case SERVER_PORT_KEY:
-                        mServerPort =
-                                Integer.valueOf(sharedPreferences.getString(SERVER_PORT_KEY, "0"));
+                        String newServerPort = sharedPreferences.getString(SERVER_PORT_KEY, "0");
+                        mServerPort = Integer.valueOf(newServerPort);
+                        Log.i(TAG, "Nowy port serwera: " + newServerPort);
                         break;
                     default:
                         break;
@@ -285,10 +296,11 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
                         mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(),
                         mLastUpdateTime, mCurrentLocation.getAltitude()));
                 if (isOnline()) {
-                    new Thread(new Client(this, mServerIp, mServerPort, mUser)).start();
+                    new Thread(new Client(mServerIp, mServerPort, this, mUser)).start();
                 }
 
                 updateUI();
+                mMapController.setZoom(PREFERRED_ZOOM);
                 mMapController.setCenter(mCurrentGeoPoint);
             }
         }
@@ -337,7 +349,7 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
                 mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), mLastUpdateTime,
                 mCurrentLocation.getAltitude()));
         if (isOnline()) {
-            new Thread(new Client(this, mServerIp, mServerPort, mUser)).start();
+            new Thread(new Client(mServerIp, mServerPort, this, mUser)).start();
         }
 
         if (mRequestingTracking) {
@@ -361,7 +373,7 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
                     mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(),
                     mLastUpdateTime, mCurrentLocation.getAltitude()));
             if (isOnline()) {
-                new Thread(new Client(this, mServerIp, mServerPort, mUser)).start();
+                new Thread(new Client(mServerIp, mServerPort, this, mUser)).start();
             }
 
             updateUI();
@@ -598,7 +610,7 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
         }
         if (isOnline()) {
             new Thread(
-                    new Client(this, mServerIp, mServerPort, mUser, new String(gpx))).start();
+                    new Client(mServerIp, mServerPort, this, mUser, new String(gpx))).start();
         } else {
             Toast.makeText(
                     this, "Niepowodzenie - brak dostępu do Internetu", Toast.LENGTH_LONG).show();

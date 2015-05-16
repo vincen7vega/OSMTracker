@@ -6,84 +6,84 @@
         jumboMode="false"
         revision="21.1.2"
         sha1="b285caf8445441b3811eb8dc0e45d88f5ddd3fea">
-        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTrackingApp\app\build\intermediates\pre-dexed\debug\slf4j-android-1.7.10-4b3936708bf10306d726eb98fa277c08f1159aad.jar" />
-    </item>
-    <item
-        jar="C:\Users\goofy\AndroidStudioProjects\OSMTrackingApp\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\21.0.3\classes.jar"
-        jumboMode="false"
-        revision="21.1.2"
-        sha1="81d42bf983a8741f4888a6e333e454e4a5e0eeb7">
-        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTrackingApp\app\build\intermediates\pre-dexed\debug\classes-f871f4690a2e729302c39065274a639ae4b11cdb.jar" />
-    </item>
-    <item
-        jar="C:\Users\goofy\AndroidStudioProjects\OSMTrackingApp\app\build\intermediates\exploded-aar\com.android.support\support-v4\21.0.3\classes.jar"
-        jumboMode="false"
-        revision="21.1.2"
-        sha1="2c91c949a45a21cdecf26e03951e46c7beec9ad8">
-        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTrackingApp\app\build\intermediates\pre-dexed\debug\classes-d9ea2e8bc6f6def70c05695d2dd37355df43c6ed.jar" />
+        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTracker\app\build\intermediates\pre-dexed\debug\slf4j-android-1.7.10-4b3936708bf10306d726eb98fa277c08f1159aad.jar" />
     </item>
     <item
         jar="C:\Users\goofy\.gradle\caches\modules-2\files-2.1\org.slf4j\slf4j-api\1.7.10\5b338f206827d88acd890739f400a9b7664e5984\slf4j-api-1.7.10.jar"
         jumboMode="false"
         revision="21.1.2"
         sha1="5b338f206827d88acd890739f400a9b7664e5984">
-        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTrackingApp\app\build\intermediates\pre-dexed\debug\slf4j-api-1.7.10-a3278be0dc61715d76bf759d670837f20a893b0e.jar" />
+        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTracker\app\build\intermediates\pre-dexed\debug\slf4j-api-1.7.10-a3278be0dc61715d76bf759d670837f20a893b0e.jar" />
     </item>
     <item
-        jar="C:\Users\goofy\AndroidStudioProjects\OSMTrackingApp\app\libs\osmbonuspack_v5.1.jar"
-        jumboMode="false"
-        revision="21.1.2"
-        sha1="6056a0c43cd37168d2bbcc0bdac23b9b8c5452f2">
-        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTrackingApp\app\build\intermediates\pre-dexed\debug\osmbonuspack_v5.1-f9258b93be340faa27c06c8ba2e8f53285277c79.jar" />
-    </item>
-    <item
-        jar="C:\Users\goofy\AndroidStudioProjects\OSMTrackingApp\app\libs\json-simple-1.1.1.jar"
+        jar="C:\Users\goofy\AndroidStudioProjects\OSMTracker\app\libs\json-simple-1.1.1.jar"
         jumboMode="false"
         revision="21.1.2"
         sha1="5d6f9b6a9ddca2a28c0216cc44efb2e20d9c23b5">
-        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTrackingApp\app\build\intermediates\pre-dexed\debug\json-simple-1.1.1-e44dce7b9ed4ac37adb0854236429d3387dd1ad9.jar" />
+        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTracker\app\build\intermediates\pre-dexed\debug\json-simple-1.1.1-a521bab93ca90368bac938a89d8ccdcb69fd9044.jar" />
     </item>
     <item
-        jar="C:\Users\goofy\AndroidStudioProjects\OSMTrackingApp\app\build\intermediates\exploded-aar\com.android.support\support-v4\21.0.3\libs\internal_impl-21.0.3.jar"
+        jar="C:\Users\goofy\AndroidStudioProjects\OSMTracker\app\build\intermediates\exploded-aar\com.android.support\support-v4\21.0.3\libs\internal_impl-21.0.3.jar"
         jumboMode="false"
         revision="21.1.2"
         sha1="01ec05bfbafcc07646ba813000bf2ef11742dd03">
-        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTrackingApp\app\build\intermediates\pre-dexed\debug\internal_impl-21.0.3-c383c9c0847b8f1d468f96e054554ddc3f595752.jar" />
+        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTracker\app\build\intermediates\pre-dexed\debug\internal_impl-21.0.3-408713b906d01254aaf564761e22389dcaabd22c.jar" />
+    </item>
+    <item
+        jar="C:\Users\goofy\AndroidStudioProjects\OSMTracker\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\21.0.3\classes.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="81d42bf983a8741f4888a6e333e454e4a5e0eeb7">
+        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTracker\app\build\intermediates\pre-dexed\debug\classes-ff1f98d7f08caaaa1661b3ea325729b4c1ec97ad.jar" />
     </item>
     <item
         jar="C:\Users\goofy\.gradle\caches\modules-2\files-2.1\com.google.code.gson\gson\2.3.1\ecb6e1f8e4b0e84c4b886c2f14a1500caf309757\gson-2.3.1.jar"
         jumboMode="false"
         revision="21.1.2"
         sha1="ecb6e1f8e4b0e84c4b886c2f14a1500caf309757">
-        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTrackingApp\app\build\intermediates\pre-dexed\debug\gson-2.3.1-b40b49b793a9bd3ed32e8a6797bb896a71aaf919.jar" />
+        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTracker\app\build\intermediates\pre-dexed\debug\gson-2.3.1-b40b49b793a9bd3ed32e8a6797bb896a71aaf919.jar" />
     </item>
     <item
         jar="C:\Users\goofy\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\21.0.3\support-annotations-21.0.3.jar"
         jumboMode="false"
         revision="21.1.2"
         sha1="4b74cefe1f0c1b819e7260c8627a14674e37fd35">
-        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTrackingApp\app\build\intermediates\pre-dexed\debug\support-annotations-21.0.3-545fc81defae6d0b886536f50707e710aa7286b6.jar" />
+        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTracker\app\build\intermediates\pre-dexed\debug\support-annotations-21.0.3-545fc81defae6d0b886536f50707e710aa7286b6.jar" />
     </item>
     <item
         jar="C:\Users\goofy\.gradle\caches\modules-2\files-2.1\org.osmdroid\osmdroid-android\4.3\2fcf7bc3cb27daa6e67c8990ea418d19f6b5b296\osmdroid-android-4.3.jar"
         jumboMode="false"
         revision="21.1.2"
         sha1="2fcf7bc3cb27daa6e67c8990ea418d19f6b5b296">
-        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTrackingApp\app\build\intermediates\pre-dexed\debug\osmdroid-android-4.3-204f4e965c83ad5de0863884686e599c51a3bc77.jar" />
+        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTracker\app\build\intermediates\pre-dexed\debug\osmdroid-android-4.3-204f4e965c83ad5de0863884686e599c51a3bc77.jar" />
     </item>
     <item
-        jar="C:\Users\goofy\AndroidStudioProjects\OSMTrackingApp\app\build\intermediates\exploded-aar\com.google.android.gms\play-services\6.5.87\classes.jar"
+        jar="C:\Users\goofy\AndroidStudioProjects\OSMTracker\app\libs\osmbonuspack_v5.1.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="6056a0c43cd37168d2bbcc0bdac23b9b8c5452f2">
+        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTracker\app\build\intermediates\pre-dexed\debug\osmbonuspack_v5.1-897179ebf7ac5c51059ec39dada88f16c5bba511.jar" />
+    </item>
+    <item
+        jar="C:\Users\goofy\AndroidStudioProjects\OSMTracker\app\build\intermediates\exploded-aar\com.google.android.gms\play-services\6.5.87\classes.jar"
         jumboMode="false"
         revision="21.1.2"
         sha1="dd9247ea0fabe8ee479638c4b4a23e93752be256">
-        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTrackingApp\app\build\intermediates\pre-dexed\debug\classes-d4f1808c8fddbb565d8d3fca27dde10c5176e75b.jar" />
+        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTracker\app\build\intermediates\pre-dexed\debug\classes-af1ca97339c2b52643fa6dc72d50ae040ef2bf40.jar" />
+    </item>
+    <item
+        jar="C:\Users\goofy\AndroidStudioProjects\OSMTracker\app\build\intermediates\exploded-aar\com.android.support\support-v4\21.0.3\classes.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="2c91c949a45a21cdecf26e03951e46c7beec9ad8">
+        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTracker\app\build\intermediates\pre-dexed\debug\classes-3ca883d5e8c398578d85143fa1f608b8d10225a6.jar" />
     </item>
     <item
         jar="C:\Users\goofy\.gradle\caches\modules-2\files-2.1\org.apache.commons\commons-lang3\3.3.2\90a3822c38ec8c996e84c16a3477ef632cbc87a3\commons-lang3-3.3.2.jar"
         jumboMode="false"
         revision="21.1.2"
         sha1="90a3822c38ec8c996e84c16a3477ef632cbc87a3">
-        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTrackingApp\app\build\intermediates\pre-dexed\debug\commons-lang3-3.3.2-665173fd8581c84a4986c26163ce18838f835976.jar" />
+        <dex dex="C:\Users\goofy\AndroidStudioProjects\OSMTracker\app\build\intermediates\pre-dexed\debug\commons-lang3-3.3.2-665173fd8581c84a4986c26163ce18838f835976.jar" />
     </item>
 
 </items>
