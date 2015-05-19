@@ -71,8 +71,10 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
     private static final String SERVER_PORT_KEY = "server-port-key";
 
     private static final int PREFERRED_ZOOM = 18;
-    private static final int UPDATE_INTERVAL_IN_MILLIS = 5000;
-    private static final int FASTEST_UPDATE_INTERVAL_IN_MILLIS = UPDATE_INTERVAL_IN_MILLIS / 2;
+    private static final int UPDATE_INTERVAL = 5000;
+    private static final int FASTEST_UPDATE_INTERVAL = UPDATE_INTERVAL / 2;
+    private static final int TRACKING_UPDATE_INTERVAL = 2000;
+    private static final int TRACKING_FASTEST_UPDATE_INTERVAL = TRACKING_UPDATE_INTERVAL / 2;
 
     private LocationManager mLocationManager;
     private ConnectivityManager mConnectivityManager;
@@ -276,8 +278,13 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
         Log.i(TAG, "Tworzenie żądania położenia (createLocationRequest())");
 
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLIS);
-        mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLIS);
+        if (!mRequestingTracking) {
+            mLocationRequest.setInterval(UPDATE_INTERVAL);
+            mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL);
+        } else {
+            mLocationRequest.setInterval(TRACKING_UPDATE_INTERVAL);
+            mLocationRequest.setFastestInterval(TRACKING_FASTEST_UPDATE_INTERVAL);
+        }
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
@@ -422,6 +429,9 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
                 getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 Toast.makeText(this, "Rozpoczęto śledzenie", Toast.LENGTH_LONG).show();
 
+                mLocationRequest.setInterval(TRACKING_UPDATE_INTERVAL);
+                mLocationRequest.setFastestInterval(TRACKING_FASTEST_UPDATE_INTERVAL);
+
                 mTrackOverlay = new Polyline(new DefaultResourceProxyImpl(this));
                 mTrackOverlay.setColor(getResources().getColor(R.color.blue_A700));
                 mTrackOverlayPoints = new ArrayList<>();
@@ -448,6 +458,10 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
                 new UploadDialogFragment().show(getFragmentManager(), UPLOAD_DIALOG_TAG);
             }
             updateUI();
+
+            mLocationRequest.setInterval(UPDATE_INTERVAL);
+            mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL);
+
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
     }
@@ -641,4 +655,24 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
     public void uploadOnCancel() {
 
     }
+
+/*    public void testUpload(View view) {
+        char[] gpx;
+        ArrayList<WayPoint> trackPoints = new ArrayList<>();
+        Date date = null;
+        for (int i = 0; i < 500; i++) {
+            date = new Date();
+            trackPoints.add(new WayPoint(52.0, 20.0, date));
+        }
+        gpx = GpxCreator.createGpxTrack(
+                MainActivity.this, "test_upload" + date.toString(), "testUpload", trackPoints);
+        GpxCreator.saveOnExternalStorage("test_upload" + date.toString(), new String(gpx));
+        if (isOnline()) {
+            new Thread(
+                    new Client(mServerIp, mServerPort, this, mUser, new String(gpx))).start();
+        } else {
+            Toast.makeText(
+                    this, "Niepowodzenie - brak dostępu do Internetu", Toast.LENGTH_LONG).show();
+        }
+    }*/
 }

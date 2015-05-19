@@ -17,7 +17,7 @@ public class Client implements Runnable {
     private MainActivity mContext;
     private User mUser;
     private String mGpx;
-    private Protocol mProtocol;
+    private IOHandler mIOHandler;
 
     public Client(String ip, int port, MainActivity context, User user) {
         mServerIp = ip;
@@ -25,7 +25,7 @@ public class Client implements Runnable {
         mContext = context;
         mUser = user;
         mGpx = "";
-        mProtocol = new Protocol();
+        mIOHandler = new IOHandler();
     }
 
     public Client(String ip, int port, MainActivity context, User user, String gpx) {
@@ -41,11 +41,36 @@ public class Client implements Runnable {
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
             DataInputStream in = new DataInputStream(socket.getInputStream());
 
-            String output = mProtocol.processInput(null, mContext, mUser, mGpx);
-            out.writeUTF(output);
+            String output = mIOHandler.createOutput(mUser, mGpx);
 
-            String input = in.readUTF();
-            mProtocol.processInput(input, mContext, mUser, mGpx);
+            int length = output.length();
+            if (length <= 16 * 1024) {
+                out.writeUTF(output);
+                out.writeUTF("end");
+            } else {
+                int start = 0;
+                int end = 16 * 1024;
+                while(start < length) {
+                    String subOutput = output.substring(start, end);
+                    out.writeUTF(subOutput);
+                    start = end;
+                    end = start + 16 * 1024;
+                    if (end > length) {
+                        end = length;
+                    }
+                }
+                out.writeUTF("end");
+            }
+
+            String input = "";
+            String subInput;
+            while (true) {
+                subInput = in.readUTF();
+                if (subInput.equals("end")) break;
+                input += subInput;
+            }
+
+            mIOHandler.processInput(input, mContext, mGpx);
 
             socket.close();
         } catch (UnknownHostException e) {
