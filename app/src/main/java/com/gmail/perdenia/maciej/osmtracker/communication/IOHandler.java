@@ -1,7 +1,10 @@
-package com.gmail.perdenia.maciej.osmtracker;
+package com.gmail.perdenia.maciej.osmtracker.communication;
 
 import android.util.Log;
 import android.widget.Toast;
+
+import com.gmail.perdenia.maciej.osmtracker.MainActivity;
+import com.gmail.perdenia.maciej.osmtracker.gpx.WayPoint;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

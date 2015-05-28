@@ -1,9 +1,11 @@
-package com.gmail.perdenia.maciej.osmtracker;
+package com.gmail.perdenia.maciej.osmtracker.gpx;
 
 import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
+
+import com.gmail.perdenia.maciej.osmtracker.R;
 
 import java.io.File;
 import java.io.FileNotFoundException;

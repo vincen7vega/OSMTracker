@@ -1,9 +1,11 @@
-package com.gmail.perdenia.maciej.osmtracker;
+package com.gmail.perdenia.maciej.osmtracker.settings;
 
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.widget.Toast;
+
+import com.gmail.perdenia.maciej.osmtracker.R;
 
 import java.util.regex.Pattern;
 

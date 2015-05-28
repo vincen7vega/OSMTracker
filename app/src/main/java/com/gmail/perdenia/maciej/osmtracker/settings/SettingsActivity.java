@@ -1,4 +1,4 @@
-package com.gmail.perdenia.maciej.osmtracker;
+package com.gmail.perdenia.maciej.osmtracker.settings;
 
 import android.app.Activity;
 import android.os.Bundle;

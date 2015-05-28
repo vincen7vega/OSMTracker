@@ -1,6 +1,8 @@
-package com.gmail.perdenia.maciej.osmtracker;
+package com.gmail.perdenia.maciej.osmtracker.communication;
 
 import android.util.Log;
+
+import com.gmail.perdenia.maciej.osmtracker.MainActivity;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

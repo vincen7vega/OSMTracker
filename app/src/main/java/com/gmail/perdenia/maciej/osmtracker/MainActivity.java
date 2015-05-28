@@ -21,6 +21,14 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.gmail.perdenia.maciej.osmtracker.communication.Client;
+import com.gmail.perdenia.maciej.osmtracker.communication.User;
+import com.gmail.perdenia.maciej.osmtracker.gui.FloatingActionButton;
+import com.gmail.perdenia.maciej.osmtracker.gui.GpsDialogFragment;
+import com.gmail.perdenia.maciej.osmtracker.gui.UploadDialogFragment;
+import com.gmail.perdenia.maciej.osmtracker.gpx.GpxCreator;
+import com.gmail.perdenia.maciej.osmtracker.gpx.WayPoint;
+import com.gmail.perdenia.maciej.osmtracker.settings.SettingsActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -73,7 +81,7 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
     private static final int PREFERRED_ZOOM = 18;
     private static final int UPDATE_INTERVAL = 5000;
     private static final int FASTEST_UPDATE_INTERVAL = UPDATE_INTERVAL / 2;
-    private static final int TRACKING_UPDATE_INTERVAL = 2000;
+    private static final int TRACKING_UPDATE_INTERVAL = 1000;
     private static final int TRACKING_FASTEST_UPDATE_INTERVAL = TRACKING_UPDATE_INTERVAL / 2;
 
     private LocationManager mLocationManager;
@@ -144,15 +152,18 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
         mTrackingFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                boolean toggle;
                 if (!mTrackingFab.isChecked()) {
                     if (!isGpsEnabled()) {
                         new GpsDialogFragment().show(getFragmentManager(), GPS_DIALOG_TAG);
                     }
-                    startTracking();
+                    toggle = startTracking();
                 } else {
-                    stopTracking();
+                    toggle = stopTracking();
                 }
-                mTrackingFab.toggle();
+                if (toggle) {
+                    mTrackingFab.toggle();
+                }
             }
         });
 
@@ -369,7 +380,7 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
         updateUI();
     }
 
-    private void goToCurrentLocation() {
+    private boolean goToCurrentLocation() {
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (mCurrentLocation != null) {
             mCurrentGeoPoint = new GeoPoint(mCurrentLocation.getLatitude(),
@@ -386,10 +397,13 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
             updateUI();
             mMapController.setZoom(PREFERRED_ZOOM);
             mMapController.animateTo(mCurrentGeoPoint);
+
+            return true;
         }
+        return false;
     }
 
-    private void saveWayPoint() {
+    private boolean saveWayPoint() {
         if (mCurrentLocation != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US);
             mGpxFilename = sdf.format(mLastUpdateTime) + "_" + mUser.getSurname() + "_"
@@ -398,7 +412,10 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
                     mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(),
                     mLastUpdateTime, mCurrentLocation.getAltitude());
             new UploadDialogFragment().show(getFragmentManager(), UPLOAD_DIALOG_TAG);
+
+            return true;
         }
+        return false;
     }
 
     private void setLocationFabState() {
@@ -423,7 +440,7 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
         }
     }
 
-    private void startTracking() {
+    private boolean startTracking() {
         if (!mRequestingTracking) {
             if (mCurrentLocation != null) {
                 getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -431,6 +448,10 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
 
                 mLocationRequest.setInterval(TRACKING_UPDATE_INTERVAL);
                 mLocationRequest.setFastestInterval(TRACKING_FASTEST_UPDATE_INTERVAL);
+                if (mGoogleApiClient.isConnected()) {
+                    stopLocationUpdates();
+                    startLocationUpdates();
+                }
 
                 mTrackOverlay = new Polyline(new DefaultResourceProxyImpl(this));
                 mTrackOverlay.setColor(getResources().getColor(R.color.blue_A700));
@@ -447,11 +468,14 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
                         + mUser.getName();
 
                 mRequestingTracking = true;
+
+                return true;
             }
         }
+        return false;
     }
 
-    private void stopTracking() {
+    private boolean stopTracking() {
         if (mRequestingTracking) {
             mRequestingTracking = false;
             if (!mTrackPoints.isEmpty()) {
@@ -461,9 +485,16 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
 
             mLocationRequest.setInterval(UPDATE_INTERVAL);
             mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL);
+            if (mGoogleApiClient.isConnected()) {
+                stopLocationUpdates();
+                startLocationUpdates();
+            }
 
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+            return true;
         }
+        return false;
     }
 
     @Override

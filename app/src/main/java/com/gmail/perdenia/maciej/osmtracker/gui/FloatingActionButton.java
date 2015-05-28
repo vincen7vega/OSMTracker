@@ -1,4 +1,4 @@
-package com.gmail.perdenia.maciej.osmtracker;
+package com.gmail.perdenia.maciej.osmtracker.gui;
 
 import android.annotation.TargetApi;
 import android.content.Context;

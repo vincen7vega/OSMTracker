@@ -1,4 +1,4 @@
-package com.gmail.perdenia.maciej.osmtracker;
+package com.gmail.perdenia.maciej.osmtracker.gpx;
 
 import android.os.Parcel;
 import android.os.Parcelable;

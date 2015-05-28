@@ -1,4 +1,6 @@
-package com.gmail.perdenia.maciej.osmtracker;
+package com.gmail.perdenia.maciej.osmtracker.communication;
+
+import com.gmail.perdenia.maciej.osmtracker.gpx.WayPoint;
 
 public class User {
 
