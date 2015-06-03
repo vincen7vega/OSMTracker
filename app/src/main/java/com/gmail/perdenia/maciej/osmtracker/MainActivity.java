@@ -54,7 +54,7 @@ import java.util.Locale;
 
 public class MainActivity extends ActionBarActivity implements LocationListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-        GpsDialogFragment.OkCancelListener, UploadDialogFragment.OkCancelListener {
+        GpsDialogFragment.OkCancelListener, UploadDialogFragment.SendCancelListener {
 
     public static final String TAG = MainActivity.class.getSimpleName();
 
@@ -82,7 +82,7 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
     private static final int UPDATE_INTERVAL = 5000;
     private static final int FASTEST_UPDATE_INTERVAL = UPDATE_INTERVAL / 2;
     private static final int TRACKING_UPDATE_INTERVAL = 1000;
-    private static final int TRACKING_FASTEST_UPDATE_INTERVAL = TRACKING_UPDATE_INTERVAL / 2;
+    private static final int TRACKING_FASTEST_UPDATE_INTERVAL = TRACKING_UPDATE_INTERVAL;
 
     private LocationManager mLocationManager;
     private ConnectivityManager mConnectivityManager;
@@ -100,7 +100,7 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
     private FloatingActionButton mLocationFab;
     private FloatingActionButton mTrackingFab;
 
-    private boolean mRequestingTracking;
+    private boolean mTracking;
     private org.osmdroid.bonuspack.overlays.Polyline mTrackOverlay;
     private ArrayList<GeoPoint> mTrackOverlayPoints;
     private ArrayList<WayPoint> mTrackPoints;
@@ -183,12 +183,13 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
                 return true;
             }
         });
+        mMapView.setMaxZoomLevel(19);
         mMapController = (MapController) mMapView.getController();
         mMapController.setZoom(6);
         GeoPoint poland = new GeoPoint(52.0, 20.0);
         mMapController.setCenter(poland);
 
-        mRequestingTracking = false;
+        mTracking = false;
         mGpxFilename = "";
 
         final SharedPreferences sharedPreferences =
@@ -244,7 +245,7 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
 
 //        mMapView.getOverlays().add(new ScaleBarOverlay(this));
 
-        if (mRequestingTracking) {
+        if (mTracking) {
             mTrackOverlayPoints.add(mCurrentGeoPoint);
             mTrackOverlay.setPoints(mTrackOverlayPoints);
             mMapView.getOverlays().add(mTrackOverlay);
@@ -289,7 +290,7 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
         Log.i(TAG, "Tworzenie żądania położenia (createLocationRequest())");
 
         mLocationRequest = new LocationRequest();
-        if (!mRequestingTracking) {
+        if (!mTracking) {
             mLocationRequest.setInterval(UPDATE_INTERVAL);
             mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL);
         } else {
@@ -370,14 +371,15 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
             new Thread(new Client(mServerIp, mServerPort, this, mUser)).start();
         }
 
-        if (mRequestingTracking) {
+        updateUI();
+
+        if (mTracking) {
             WayPoint trackPoint = new WayPoint(
                     mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(),
                     mLastUpdateTime, mCurrentLocation.getAltitude());
             mTrackPoints.add(trackPoint);
+            mMapController.animateTo(mCurrentGeoPoint);
         }
-
-        updateUI();
     }
 
     private boolean goToCurrentLocation() {
@@ -441,7 +443,7 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
     }
 
     private boolean startTracking() {
-        if (!mRequestingTracking) {
+        if (!mTracking) {
             if (mCurrentLocation != null) {
                 getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 Toast.makeText(this, "Rozpoczęto śledzenie", Toast.LENGTH_LONG).show();
@@ -467,7 +469,7 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
                 mGpxFilename = sdf.format(mLastUpdateTime) + "_" + mUser.getSurname() + "_"
                         + mUser.getName();
 
-                mRequestingTracking = true;
+                mTracking = true;
 
                 return true;
             }
@@ -476,8 +478,8 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
     }
 
     private boolean stopTracking() {
-        if (mRequestingTracking) {
-            mRequestingTracking = false;
+        if (mTracking) {
+            mTracking = false;
             if (!mTrackPoints.isEmpty()) {
                 new UploadDialogFragment().show(getFragmentManager(), UPLOAD_DIALOG_TAG);
             }
@@ -533,7 +535,7 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
         savedInstanceState.putParcelable(LOCATION_KEY, mCurrentLocation);
         savedInstanceState.putSerializable(LAST_UPDATE_TIME_KEY, mLastUpdateTime);
 
-        savedInstanceState.putBoolean(REQUESTING_TRACKING_KEY, mRequestingTracking);
+        savedInstanceState.putBoolean(REQUESTING_TRACKING_KEY, mTracking);
 
         Location mapCenter = new Location("dummyprovider");
         mapCenter.setLatitude(mMapView.getMapCenter().getLatitude());
@@ -576,12 +578,12 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
             }
 
             if (savedInstanceState.keySet().contains(REQUESTING_TRACKING_KEY)) {
-                mRequestingTracking = savedInstanceState.getBoolean(REQUESTING_TRACKING_KEY);
-                mTrackingFab.setChecked(mRequestingTracking);
+                mTracking = savedInstanceState.getBoolean(REQUESTING_TRACKING_KEY);
+                mTrackingFab.setChecked(mTracking);
             }
 
             if (savedInstanceState.keySet().contains(TRACK_OVERLAY_POINTS_KEY) &&
-                    mRequestingTracking) {
+                    mTracking) {
                 mTrackOverlay = new Polyline(new DefaultResourceProxyImpl(this));
                 mTrackOverlay.setColor(getResources().getColor(R.color.blue_A700));
                 mTrackOverlayPoints =
@@ -637,18 +639,19 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
         mOtherUsers = otherUsers;
     }
 
-    private void saveAndSendGpx(String name) {
+    private void saveAndSendGpx(String name, String description) {
         char[] gpx;
+        String author = "ID" + mUser.getId() + " " + mUser.getName() + " " + mUser.getSurname();
         if (mWayPoint != null) {
             gpx = GpxCreator.createGpxWayPoint(
-                    MainActivity.this, mGpxFilename, name, mWayPoint);
+                    MainActivity.this, author, mGpxFilename, name, description, mWayPoint);
             GpxCreator.saveOnInternalStorage(
                     MainActivity.this, mGpxFilename, new String(gpx));
             GpxCreator.saveOnExternalStorage(mGpxFilename, new String(gpx));
             mWayPoint = null;
         } else {
             gpx = GpxCreator.createGpxTrack(
-                    MainActivity.this, mGpxFilename, name, mTrackPoints);
+                    MainActivity.this, author, mGpxFilename, name, description, mTrackPoints);
             GpxCreator.saveOnInternalStorage(
                     MainActivity.this, mGpxFilename, new String(gpx));
             GpxCreator.saveOnExternalStorage(mGpxFilename, new String(gpx));
@@ -674,36 +677,12 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
     }
 
     @Override
-    public void uploadOnOk(EditText input) {
-        String name = input.getText().toString();
-        if (name.equals("")) {
-            name = mGpxFilename;
-        }
-        saveAndSendGpx(name);
+    public void uploadOnSend(EditText name, EditText description) {
+        saveAndSendGpx(name.getText().toString(), description.getText().toString());
     }
 
     @Override
     public void uploadOnCancel() {
 
     }
-
-/*    public void testUpload(View view) {
-        char[] gpx;
-        ArrayList<WayPoint> trackPoints = new ArrayList<>();
-        Date date = null;
-        for (int i = 0; i < 500; i++) {
-            date = new Date();
-            trackPoints.add(new WayPoint(52.0, 20.0, date));
-        }
-        gpx = GpxCreator.createGpxTrack(
-                MainActivity.this, "test_upload" + date.toString(), "testUpload", trackPoints);
-        GpxCreator.saveOnExternalStorage("test_upload" + date.toString(), new String(gpx));
-        if (isOnline()) {
-            new Thread(
-                    new Client(mServerIp, mServerPort, this, mUser, new String(gpx))).start();
-        } else {
-            Toast.makeText(
-                    this, "Niepowodzenie - brak dostępu do Internetu", Toast.LENGTH_LONG).show();
-        }
-    }*/
 }

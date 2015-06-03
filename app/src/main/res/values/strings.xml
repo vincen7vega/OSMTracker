@@ -20,13 +20,16 @@
         lokalizacji. Przejdź do ustawień, aby je aktywować.
     </string>
     <string name="dialog_text_upload_gpx">
-        Upewnij się, że masz dostęp do Internetu, a następnie
-        wprowadź nazwę wysyłanego punktu/śladu:
+        Przed wysłaniem punktu/śladu na serwer upewnij się, że masz dostęp do Internetu oraz
+        uzupełnij poniższe pola.
     </string>
+    <string name="dialog_text_upload_name">Nazwa (opcjonalnie):</string>
+    <string name="dialog_text_upload_description">Opis (opcjonalnie):</string>
     <string name="dialog_btn_yes">Tak</string>
     <string name="dialog_btn_ok">OK</string>
     <string name="dialog_btn_no">Nie</string>
     <string name="dialog_btn_cancel">Anuluj</string>
+    <string name="dialog_btn_send">Wyślij</string>
 
     <!--Ekran preferencji-->
     <string name="pref_cat_title_user_data">Dane użytkownika</string>

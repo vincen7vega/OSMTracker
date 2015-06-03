@@ -20,39 +20,46 @@ public class GpxCreator {
     public static final String LINE_END = "\r\n";
 
     public static char[] createGpxTrack(
-            Context context, String filename, String name, ArrayList<WayPoint> trackPoints) {
+            Context context, String author, String filename, String name, String description,
+            ArrayList<WayPoint> trackPoints) {
         String result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + LINE_END +
                 "<gpx version=\"1.0\"" + LINE_END +
                 "creator=\"" + context.getResources().getString(R.string.app_name) + "\"" + LINE_END +
                 "xmlns=\"http://www.topografix.com/GPX/1/0\">" + LINE_END +
+                "<author>" + author + "</author>" + LINE_END +
                 "<name>" + filename + "</name>" + LINE_END +
-                "<trk><name>" + name + "</name><trkseg>" + LINE_END;
+                "<trk>" + LINE_END + "<name>" + name + "</name>" + LINE_END +
+                "<desc>" + description + "</desc>" + LINE_END +
+                "<trkseg>" + LINE_END;
         for (WayPoint tp : trackPoints) {
             result += "<trkpt lat=\"" + tp.getLatitude() + "\" lon=\"" + tp.getLongitude() + "\">" +
                     "<ele>" + tp.getElevation() + "</ele>" +
                     "<time>" + tp.getTimeString() + "</time></trkpt>" + LINE_END;
         }
-        result += "</trkseg></trk>" + LINE_END + "</gpx>";
+        result += "</trkseg>" + LINE_END + "</trk>" + LINE_END + "</gpx>";
 
         return result.toCharArray();
     }
 
     public static char[] createGpxWayPoint(
-            Context context, String filename, String name, WayPoint wpt) {
+            Context context, String author, String filename, String name, String description,
+            WayPoint wpt) {
         String result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + LINE_END +
                 "<gpx version=\"1.0\"" + LINE_END +
                 "creator=\"" + context.getResources().getString(R.string.app_name) + "\"" + LINE_END +
                 "xmlns=\"http://www.topografix.com/GPX/1/0\">" + LINE_END +
+                "<author>" + author + "</author>" + LINE_END +
                 "<name>" + filename + "</name>" + LINE_END +
                 "<trk><trkseg>" + LINE_END +
                 "<trkpt lat=\"" + wpt.getLatitude() + "\" lon=\"" + wpt.getLongitude() + "\">" +
-                "<time>" + wpt.getTimeString() + "</time></trkpt>" +
+                "<time>" + wpt.getTimeString() + "</time></trkpt>" + LINE_END +
                 "</trkseg></trk>" + LINE_END +
                 "<wpt lat=\"" + wpt.getLatitude() + "\" lon=\"" + wpt.getLongitude() + "\">" +
                 LINE_END +
                 "<ele>" + wpt.getElevation() + "</ele>" + LINE_END +
                 "<time>" + wpt.getTimeString() + "</time>" + LINE_END +
                 "<name>" + name + "</name>" + LINE_END +
+                "<desc>" + description + "</desc>" + LINE_END +
                 "</wpt>" + LINE_END + "</gpx>";
 
         return result.toCharArray();
@@ -87,7 +94,8 @@ public class GpxCreator {
                         .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                         .toString();
             }
-            File gpxFilesDir = new File(root + "/Gpx Files");
+            File gpxFilesDir = new File(root + "/GPX Files");
+            //noinspection ResultOfMethodCallIgnored
             gpxFilesDir.mkdirs();
             File gpxFile = new File(gpxFilesDir, filename + ".gpx");
             try {

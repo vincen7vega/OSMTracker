@@ -13,5 +13,6 @@
     <dimen name="fab_press_translation_z">6dp</dimen>
 
     <dimen name="dialog_margin">24dp</dimen>
+    <dimen name="dialog_margin_inner_top">10dp</dimen>
 
 </resources>
