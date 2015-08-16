@@ -63,18 +63,4 @@
 
     </com.gmail.perdenia.maciej.osmtracker.gui.FloatingActionButton>
 
-<!--    <Button
-        android:id="@+id/test_upload"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginBottom="16dp"
-        android:text="test"
-        android:onClick="testUpload"
-        />-->
-
 </RelativeLayout>
