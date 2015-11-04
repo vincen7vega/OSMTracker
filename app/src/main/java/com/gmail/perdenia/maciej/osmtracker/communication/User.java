@@ -2,17 +2,21 @@ package com.gmail.perdenia.maciej.osmtracker.communication;
 
 import com.gmail.perdenia.maciej.osmtracker.gpx.WayPoint;
 
+import java.util.Date;
+
 public class User {
 
     private int mId;
     private String mName;
     private String mSurname;
     private WayPoint mWayPoint;
+    private boolean mActive;
 
     public User(int id, String name, String surname) {
         mId = id;
         mName = name;
         mSurname = surname;
+        mActive = true;
     }
 
     public User(int id, String name, String surname, WayPoint wayPoint) {
@@ -50,5 +54,18 @@ public class User {
 
     public WayPoint getWayPoint() {
         return mWayPoint;
+    }
+
+    public void setActive(boolean active) {
+        mActive = active;
+    }
+
+    public boolean checkActivity() {
+        setActive(true);
+        Date currentTime = new Date();
+        if (currentTime.getTime() - mWayPoint.getTime().getTime() > 15000) {
+            setActive(false);
+        }
+        return mActive;
     }
 }

@@ -46,11 +46,6 @@ public class WayPoint implements Parcelable {
         mElevation = elevation;
     }
 
-    public WayPoint(double latitude, double longitude, String time, double elevation) {
-        this(latitude, longitude, time);
-        mElevation = elevation;
-    }
-
     public WayPoint(Parcel in) {
         readFromParcel(in);
     }
@@ -61,10 +56,6 @@ public class WayPoint implements Parcelable {
 
     public double getLongitude() {
         return mLongitude;
-    }
-
-    public void setElevation(double elevation) {
-        mElevation = elevation;
     }
 
     public double getElevation() {

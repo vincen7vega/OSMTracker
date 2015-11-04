@@ -261,15 +261,17 @@ public class MainActivity extends ActionBarActivity implements LocationListener,
 
         if (mOtherUsers.size() > 0) {
             for (User u : mOtherUsers) {
-                Marker otherUserMarker = new Marker(mMapView);
-                otherUserMarker.setPosition(new GeoPoint(
-                        u.getWayPoint().getLatitude(), u.getWayPoint().getLongitude()));
-                otherUserMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-                otherUserMarker.setIcon(
-                        getResources().getDrawable(R.drawable.map_icon_other_users_location));
-                otherUserMarker.setTitle(u.getName() + " " + u.getSurname());
-                otherUserMarker.setSnippet("Położenie powyższego użytkownika");
-                mMapView.getOverlays().add(otherUserMarker);
+                if (u.checkActivity()) {
+                    Marker otherUserMarker = new Marker(mMapView);
+                    otherUserMarker.setPosition(new GeoPoint(
+                            u.getWayPoint().getLatitude(), u.getWayPoint().getLongitude()));
+                    otherUserMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                    otherUserMarker.setIcon(
+                            getResources().getDrawable(R.drawable.map_icon_other_users_location));
+                    otherUserMarker.setTitle(u.getName() + " " + u.getSurname());
+                    otherUserMarker.setSnippet("Położenie powyższego użytkownika");
+                    mMapView.getOverlays().add(otherUserMarker);
+                }
             }
         }
         mMapView.invalidate();
